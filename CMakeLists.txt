@@ -53,24 +53,20 @@ target_link_libraries( controller
 ### LIBRARY INSTALLATION
 ###
 
-if (CMAKE_BUILD_TYPE MATCHES Release)
+include(GNUInstallDirs)
 
-    include(GNUInstallDirs)
+install(TARGETS controller EXPORT ControllerConfig
+        ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-    install(TARGETS controller EXPORT ControllerConfig
-            ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-    install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(EXPORT ControllerConfig
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/Controller
+        EXPORT_LINK_INTERFACE_LIBRARIES)
 
-    install(EXPORT ControllerConfig
-            DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/Controller
-            EXPORT_LINK_INTERFACE_LIBRARIES)
-
-    export(TARGETS controller FILE ControllerConfig.cmake)
-    install(CODE "FILE(APPEND ${CMAKE_INSTALL_FULL_DATADIR}/cmake/Controller/ControllerConfig.cmake \"find_package(Params-cpp REQUIRED)\n\") ")
-    install(CODE "FILE(APPEND ${CMAKE_INSTALL_FULL_DATADIR}/cmake/Controller/ControllerConfig.cmake \"find_package(Cellworld REQUIRED)\n\") ")
-    install(CODE "FILE(APPEND ${CMAKE_INSTALL_FULL_DATADIR}/cmake/Controller/ControllerConfig.cmake \"set(CONTROLLER_LIBRARIES ${CELLWORLD_LIBRARIES} params-cpp )\n\") ")
-
-endif()
+export(TARGETS controller FILE ControllerConfig.cmake)
+install(CODE "FILE(APPEND ${CMAKE_INSTALL_FULL_DATADIR}/cmake/Controller/ControllerConfig.cmake \"find_package(Params-cpp REQUIRED)\n\") ")
+install(CODE "FILE(APPEND ${CMAKE_INSTALL_FULL_DATADIR}/cmake/Controller/ControllerConfig.cmake \"find_package(Cellworld REQUIRED)\n\") ")
+install(CODE "FILE(APPEND ${CMAKE_INSTALL_FULL_DATADIR}/cmake/Controller/ControllerConfig.cmake \"set(CONTROLLER_LIBRARIES ${CELLWORLD_LIBRARIES} params-cpp )\n\") ")
