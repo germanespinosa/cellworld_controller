@@ -75,6 +75,7 @@ namespace controller {
         state = Controller_state::Playing;
         Pid_inputs pi;
         while(state != Controller_state::Stopped){
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
             // if there is no information from the tracker
             if (!tracking_client.agent.is_valid() ||
                 state == Controller_state::Paused ||
@@ -93,7 +94,6 @@ namespace controller {
             agent.set_left(robot_command.left);
             agent.set_right(robot_command.right);
             agent.update();
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
