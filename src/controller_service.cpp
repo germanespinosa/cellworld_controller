@@ -41,8 +41,12 @@ namespace controller {
     }
 
     void Controller_server::send_step(const Step &step) {
-        Message update (step.agent_name + "_step", step);
-        broadcast_subscribed(update);
+        if (!clients.empty()) {
+            broadcast_subscribed(Message (step.agent_name + "_step", step));
+        }
+        for (auto local_client: subscribed_local_clients){
+            local_client->on_step(step);
+        }
     }
 
     Controller_server::Controller_server(const string &pid_config_file_path,
@@ -175,8 +179,18 @@ namespace controller {
 
     bool Controller_server::set_behavior(int behavior) {
         this->behavior = static_cast<Behavior> (behavior);
-        experiment_client.send_message(Message("behavior_set", behavior));
+        experiment_client.set_behavior(behavior);
         return true;
+    }
+
+    void Controller_server::send_capture(int frame) {
+        experiment_client.capture(frame);
+        if (!clients.empty()){
+            broadcast_subscribed(Message("prey_captured", frame));
+        }
+        for (auto local_client: subscribed_local_clients){
+            local_client->on_prey_captured(frame);
+        }
     }
 
     void Controller_server::Controller_tracker::on_step(const Step &step) {
@@ -189,7 +203,7 @@ namespace controller {
                 auto predator = get_current_state(agent.agent_name);
                 auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
                 if (is_captured)
-                    experiment_client.capture(step.frame);
+                    server.send_capture(step.frame);
                 if (visibility.is_visible(predator.location, step.location) &&
                     angle_difference(predator.location.atan(step.location), predator.rotation) < view_angle) {
                     if (peeking.is_seen(predator.location, step.location)) {

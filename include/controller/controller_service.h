@@ -5,6 +5,7 @@
 #include <controller/agent.h>
 #include <agent_tracking/tracking_client.h>
 #include <experiment/experiment_client.h>
+#include <controller/controller_client.h>
 
 namespace controller {
 
@@ -50,6 +51,7 @@ namespace controller {
     struct Controller_server : tcp_messages::Message_server<Controller_service> {
         Controller_server(const std::string &pid_config_file_path, Agent &, const std::string &tracker_ip, const std::string &experiment_service_ip);
         void send_step(const cell_world::Step &);
+        void send_capture(int);
         bool set_destination(const cell_world::Location &);
         bool pause();
         bool resume();
@@ -108,5 +110,36 @@ namespace controller {
         } tracker;
 
         void controller_process();
+
+
+        template< typename T, typename... Ts>
+        T &create_local_client(Ts... vs){
+            static_assert(std::is_base_of<Controller_client, T>::value, "T must inherit from Controller_client");
+            auto new_local_client = new T{ vs... };
+            local_clients.push_back((Controller_client *) new_local_client);
+            new_local_client->local_server = this;
+            return *new_local_client;
+        }
+
+        bool subscribe_local( Controller_client *client) {
+            subscribed_local_clients.push_back(client);
+            return true;
+        }
+
+        bool unsubscribe_local(Controller_client *client) {
+            subscribed_local_clients.erase(std::remove(subscribed_local_clients.begin(), subscribed_local_clients.end(), client));
+            return true;
+        }
+
+        bool remove_local_client(Controller_client *client) {
+            subscribed_local_clients.erase(std::remove(subscribed_local_clients.begin(), subscribed_local_clients.end(), client));
+            local_clients.erase(std::remove(local_clients.begin(), local_clients.end(), client));
+            delete client;
+            return true;
+        }
+
+        std::vector<Controller_client * > local_clients;
+        std::vector<Controller_client * > subscribed_local_clients;
+
     };
 }
