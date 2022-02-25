@@ -51,7 +51,7 @@ namespace controller {
 
     Controller_server::Controller_server(const string &pid_config_file_path,
                                          Agent &agent,
-                                         Controller_tracker &tracker,
+                                         Controller_tracker &tracking_client,
                                          Controller_experiment_client &experiment_client):
             agent(agent),
             pid_controller (Json_from_file<Pid_parameters>(pid_config_file_path)),
@@ -65,13 +65,13 @@ namespace controller {
             navigability(cells, world.cell_shape,Transformation(world.cell_transformation.size, world.cell_transformation.rotation)),
             capture(Resources::from("capture_parameters").key("default").get_resource<Capture_parameters>(), world),
             peeking(Resources::from("peeking_parameters").key("default").get_resource<Peeking_parameters>(),world),
-            tracker(tracker),
+            tracking_client(tracking_client),
             destination_timer(5),
             experiment_client(experiment_client)
     {
-        tracker.server = this;
+        tracking_client.server = this;
         experiment_client.controller_server = this;
-        tracker.subscribe();
+        tracking_client.subscribe();
         state = Controller_state::Stopped;
         process = thread(&Controller_server::controller_process, this);
     }
@@ -81,7 +81,7 @@ namespace controller {
         Pid_inputs pi;
         while(state != Controller_state::Stopped){
             // if there is no information from the tracker
-            if (!tracker.agent.is_valid() ||
+            if (!tracking_client.agent.is_valid() ||
                 state == Controller_state::Paused ||
                 destination_timer.time_out()){
                 agent.set_left(0);
@@ -91,8 +91,8 @@ namespace controller {
             }
 
             //PID controller
-            pi.location = tracker.agent.step.location;
-            pi.rotation = tracker.agent.step.rotation;
+            pi.location = tracking_client.agent.step.location;
+            pi.rotation = tracking_client.agent.step.rotation;
             pi.destination = get_next_stop();
             auto robot_command = pid_controller.process(pi, behavior);
             agent.set_left(robot_command.left);
@@ -116,7 +116,7 @@ namespace controller {
     }
 
     cell_world::Location Controller_server::get_next_stop() {
-        auto agent_location = tracker.agent.step.location;
+        auto agent_location = tracking_client.agent.step.location;
         if (navigability.is_visible(agent_location, destination)) {
             return destination;
         }

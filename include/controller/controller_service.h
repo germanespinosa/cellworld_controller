@@ -105,7 +105,7 @@ namespace controller {
             cell_world::Capture &capture;
             experiment::Experiment_client &experiment_client;
             cell_world::Peeking &peeking;
-        } &tracker;
+        } &tracking_client;
 
         Controller_server(const std::string &pid_config_file_path, Agent &, Controller_tracker &, Controller_experiment_client &);
 
