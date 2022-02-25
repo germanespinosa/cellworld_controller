@@ -71,7 +71,6 @@ namespace controller {
 
         cell_world::Location_visibility navigability;
         Pid_controller pid_controller;
-        cell_world::Cell_group_builder occlusions;
         std::thread process;
 
         struct Controller_experiment_client : experiment::Experiment_client {
@@ -85,7 +84,6 @@ namespace controller {
             Controller_tracking_client(cell_world::Location_visibility &visibility,
                                float view_angle,
                                cell_world::Capture &capture,
-                               experiment::Experiment_client &experiment_client,
                                cell_world::Peeking &peeking,
                                const std::string &agent_name,
                                const std::string &adversary_name) :
@@ -94,17 +92,15 @@ namespace controller {
             visibility(visibility),
             view_angle(view_angle),
             capture(capture),
-            experiment_client(experiment_client),
             peeking(peeking){
             }
             void on_step(const cell_world::Step &step) override;
             Agent_data agent;
             Agent_data adversary;
             cell_world::Location_visibility &visibility;
-            Controller_server *server;
+            Controller_server *controller_server;
             float view_angle;
             cell_world::Capture &capture;
-            experiment::Experiment_client &experiment_client;
             cell_world::Peeking &peeking;
         } &tracking_client;
 

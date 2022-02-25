@@ -64,7 +64,7 @@ namespace controller {
             destination_timer(5),
             experiment_client(experiment_client)
     {
-        tracking_client.server = this;
+        tracking_client.controller_server = this;
         experiment_client.controller_server = this;
         tracking_client.subscribe();
         state = Controller_state::Stopped;
@@ -168,7 +168,7 @@ namespace controller {
 
     void Controller_server::Controller_tracking_client::on_step(const Step &step) {
         if (step.agent_name == agent.agent_name) {
-            server->send_step(step);
+            controller_server->send_step(step);
             agent.step = step;
             agent.timer = Timer(.5);
         } else if (step.agent_name == adversary.agent_name) {
@@ -176,11 +176,11 @@ namespace controller {
                 auto predator = get_current_state(agent.agent_name);
                 auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
                 if (is_captured)
-                    server->send_capture(step.frame);
+                    controller_server->send_capture(step.frame);
                 if (visibility.is_visible(predator.location, step.location) &&
                     angle_difference(predator.location.atan(step.location), predator.rotation) < view_angle) {
                     if (peeking.is_seen(predator.location, step.location)) {
-                        server->send_step(step);
+                        controller_server->send_step(step);
                     }
                 } else {
                     peeking.not_visible();
