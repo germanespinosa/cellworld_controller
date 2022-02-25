@@ -223,5 +223,9 @@ namespace controller {
         controller_server->set_world(experiment.world);
         Experiment_client::on_episode_started(experiment_name);
     }
+
+    Controller_server::Controller_experiment_client::Controller_experiment_client() {
+
+    }
 }
 

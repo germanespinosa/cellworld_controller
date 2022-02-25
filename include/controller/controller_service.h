@@ -87,7 +87,13 @@ namespace controller {
         cell_world::Location get_next_stop();
 
         struct Controller_tracker : agent_tracking::Tracking_client {
-            Controller_tracker(cell_world::Location_visibility &visibility, float view_angle, cell_world::Capture &capture, experiment::Experiment_client &experiment_client, cell_world::Peeking &peeking, const std::string &agent_name, const std::string &adversary_name) :
+            Controller_tracker(cell_world::Location_visibility &visibility,
+                               float view_angle,
+                               cell_world::Capture &capture,
+                               experiment::Experiment_client &experiment_client,
+                               cell_world::Peeking &peeking,
+                               const std::string &agent_name,
+                               const std::string &adversary_name) :
             agent(agent_name),
             adversary(adversary_name),
             visibility(visibility),
