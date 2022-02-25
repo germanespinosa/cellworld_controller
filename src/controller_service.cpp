@@ -51,8 +51,8 @@ namespace controller {
 
     Controller_server::Controller_server(const string &pid_config_file_path,
                                          Agent &agent,
-                                         const string &tracker_ip,
-                                         const string &experiment_service_ip):
+                                         Controller_tracker &tracker,
+                                         Controller_experiment_client &experiment_client):
             agent(agent),
             pid_controller (Json_from_file<Pid_parameters>(pid_config_file_path)),
             world_configuration(Resources::from("world_configuration").key("hexagonal").get_resource<World_configuration>()),
@@ -65,25 +65,15 @@ namespace controller {
             navigability(cells, world.cell_shape,Transformation(world.cell_transformation.size, world.cell_transformation.rotation)),
             capture(Resources::from("capture_parameters").key("default").get_resource<Capture_parameters>(), world),
             peeking(Resources::from("peeking_parameters").key("default").get_resource<Peeking_parameters>(),world),
-            tracker(*this, visibility, 90,  capture, experiment_client, peeking, "predator", "prey"),
+            tracker(tracker),
             destination_timer(5),
-            experiment_client(*this)
+            experiment_client(experiment_client)
     {
-        if (!experiment_client.connect(experiment_service_ip)) {
-            cout << "failed to connect to experiment server" << endl;
-            exit(0);
-        }
-        experiment_client.subscribe();
-        cout << "connected to experiment server"<< endl;
-        if (!tracker.connect(tracker_ip)) {
-            cout << "failed to connect to tracking service" << endl;
-            exit(0);
-        }
+        tracker.server = this;
+        experiment_client.controller_server = this;
         tracker.subscribe();
-        cout << "connected to tracking service" << endl;
         state = Controller_state::Stopped;
         process = thread(&Controller_server::controller_process, this);
-        cout << "agent controller started" << endl;
     }
 
     void Controller_server::controller_process() {
@@ -195,7 +185,7 @@ namespace controller {
 
     void Controller_server::Controller_tracker::on_step(const Step &step) {
         if (step.agent_name == agent.agent_name) {
-            server.send_step(step);
+            server->send_step(step);
             agent.step = step;
             agent.timer = Timer(.5);
         } else if (step.agent_name == adversary.agent_name) {
@@ -203,11 +193,11 @@ namespace controller {
                 auto predator = get_current_state(agent.agent_name);
                 auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
                 if (is_captured)
-                    server.send_capture(step.frame);
+                    server->send_capture(step.frame);
                 if (visibility.is_visible(predator.location, step.location) &&
                     angle_difference(predator.location.atan(step.location), predator.rotation) < view_angle) {
                     if (peeking.is_seen(predator.location, step.location)) {
-                        server.send_step(step);
+                        server->send_step(step);
                     }
                 } else {
                     peeking.not_visible();
@@ -230,13 +220,8 @@ namespace controller {
     void Controller_server::Controller_experiment_client::on_episode_started(const string &experiment_name) {
         experiment::Start_experiment_response experiment;
         experiment.load(get_experiment_file(experiment_name));
-        controller_server.set_world(experiment.world);
+        controller_server->set_world(experiment.world);
         Experiment_client::on_episode_started(experiment_name);
-    }
-
-    Controller_server::Controller_experiment_client::Controller_experiment_client(Controller_server &controller_server):
-            controller_server(controller_server){
-
     }
 }
 

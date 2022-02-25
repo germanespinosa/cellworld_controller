@@ -49,7 +49,6 @@ namespace controller {
     };
 
     struct Controller_server : tcp_messages::Message_server<Controller_service> {
-        Controller_server(const std::string &pid_config_file_path, Agent &, const std::string &tracker_ip, const std::string &experiment_service_ip);
         void send_step(const cell_world::Step &);
         void send_capture(int);
         bool set_destination(const cell_world::Location &);
@@ -65,11 +64,11 @@ namespace controller {
         Agent &agent;
 
         struct Controller_experiment_client : experiment::Experiment_client {
-            explicit Controller_experiment_client(Controller_server &);
+            explicit Controller_experiment_client();
             void on_experiment_started(const experiment::Start_experiment_response &experiment) override;
             void on_episode_started(const std::string &experiment_name) override;
-            Controller_server &controller_server;
-        } experiment_client;
+            Controller_server *controller_server;
+        } &experiment_client;
 
         Behavior behavior = Explore;
         cell_world::Peeking peeking;
@@ -88,26 +87,28 @@ namespace controller {
         cell_world::Location get_next_stop();
 
         struct Controller_tracker : agent_tracking::Tracking_client {
-            Controller_tracker(Controller_server &server, cell_world::Location_visibility &visibility, float view_angle, cell_world::Capture &capture, experiment::Experiment_client &experiment_client, cell_world::Peeking &peeking, const std::string &agent_name, const std::string &adversary_name) :
+            Controller_tracker(cell_world::Location_visibility &visibility, float view_angle, cell_world::Capture &capture, experiment::Experiment_client &experiment_client, cell_world::Peeking &peeking, const std::string &agent_name, const std::string &adversary_name) :
             agent(agent_name),
             adversary(adversary_name),
-            server(server),
-                    visibility(visibility),
-                    view_angle(view_angle),
-                    capture(capture),
-                    experiment_client(experiment_client),
-                    peeking(peeking){
+            visibility(visibility),
+            view_angle(view_angle),
+            capture(capture),
+            experiment_client(experiment_client),
+            peeking(peeking){
             }
             void on_step(const cell_world::Step &step) override;
             Agent_data agent;
             Agent_data adversary;
             cell_world::Location_visibility &visibility;
-            Controller_server &server;
+            Controller_server *server;
             float view_angle;
             cell_world::Capture &capture;
             experiment::Experiment_client &experiment_client;
             cell_world::Peeking &peeking;
-        } tracker;
+        } &tracker;
+
+        Controller_server(const std::string &pid_config_file_path, Agent &, Controller_tracker &, Controller_experiment_client &);
+
 
         void controller_process();
 
