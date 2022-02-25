@@ -40,6 +40,8 @@ target_include_directories(controller
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
+dependency_include(include)
+
 target_include_directories(controller
         PRIVATE
         include )
