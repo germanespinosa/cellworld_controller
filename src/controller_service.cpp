@@ -51,7 +51,7 @@ namespace controller {
 
     Controller_server::Controller_server(const string &pid_config_file_path,
                                          Agent &agent,
-                                         Controller_tracker &tracking_client,
+                                         Controller_tracking_client &tracking_client,
                                          Controller_experiment_client &experiment_client):
             agent(agent),
             pid_controller (Json_from_file<Pid_parameters>(pid_config_file_path)),
@@ -183,7 +183,7 @@ namespace controller {
         }
     }
 
-    void Controller_server::Controller_tracker::on_step(const Step &step) {
+    void Controller_server::Controller_tracking_client::on_step(const Step &step) {
         if (step.agent_name == agent.agent_name) {
             server->send_step(step);
             agent.step = step;

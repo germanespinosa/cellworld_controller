@@ -86,8 +86,8 @@ namespace controller {
         std::thread process;
         cell_world::Location get_next_stop();
 
-        struct Controller_tracker : agent_tracking::Tracking_client {
-            Controller_tracker(cell_world::Location_visibility &visibility,
+        struct Controller_tracking_client : agent_tracking::Tracking_client {
+            Controller_tracking_client(cell_world::Location_visibility &visibility,
                                float view_angle,
                                cell_world::Capture &capture,
                                experiment::Experiment_client &experiment_client,
@@ -113,7 +113,7 @@ namespace controller {
             cell_world::Peeking &peeking;
         } &tracking_client;
 
-        Controller_server(const std::string &pid_config_file_path, Agent &, Controller_tracker &, Controller_experiment_client &);
+        Controller_server(const std::string &pid_config_file_path, Agent &, Controller_tracking_client &, Controller_experiment_client &);
 
 
         void controller_process();
