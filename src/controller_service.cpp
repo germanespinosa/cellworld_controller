@@ -54,7 +54,7 @@ namespace controller {
                                          Controller_tracking_client &tracking_client,
                                          Controller_experiment_client &experiment_client):
             agent(agent),
-            world(Resources::from("world_configuration").key("hexagonal").get_resource<World_configuration>(),Resources::from("world_implementation").key("canonical").get_resource<World_implementation>()),
+            world(Resources::from("world_configuration").key("hexagonal").get_resource<World_configuration>(),Resources::from("world_implementation").key("hexagonal").key("canonical").get_resource<World_implementation>()),
             cells(world.create_cell_group()),
             paths(world.create_paths(Resources::from("paths").key("hexagonal").key("00_00").key("astar").get_resource<Path_builder>())),
             map(cells),
