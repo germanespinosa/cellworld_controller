@@ -54,17 +54,12 @@ namespace controller {
                                          Controller_tracking_client &tracking_client,
                                          Controller_experiment_client &experiment_client):
             agent(agent),
-            pid_controller (Json_from_file<Pid_parameters>(pid_config_file_path)),
-            world_configuration(Resources::from("world_configuration").key("hexagonal").get_resource<World_configuration>()),
-            world_implementation(Resources::from("world_implementation").key("hexagonal").key("canonical").get_resource<World_implementation>()),
-            world(world_configuration,world_implementation),
+            world(Resources::from("world_configuration").key("hexagonal").get_resource<World_configuration>(),Resources::from("world_implementation").key("canonical").get_resource<World_implementation>()),
             cells(world.create_cell_group()),
-            map(cells),
             paths(world.create_paths(Resources::from("paths").key("hexagonal").key("00_00").key("astar").get_resource<Path_builder>())),
-            visibility(cells, world.cell_shape, world.cell_transformation),
+            map(cells),
             navigability(cells, world.cell_shape,Transformation(world.cell_transformation.size, world.cell_transformation.rotation)),
-            capture(Resources::from("capture_parameters").key("default").get_resource<Capture_parameters>(), world),
-            peeking(Resources::from("peeking_parameters").key("default").get_resource<Peeking_parameters>(),world),
+            pid_controller (Json_from_file<Pid_parameters>(pid_config_file_path)),
             tracking_client(tracking_client),
             destination_timer(5),
             experiment_client(experiment_client)
@@ -103,12 +98,6 @@ namespace controller {
     }
 
     bool Controller_server::set_destination(const cell_world::Location &new_destination) {
-        auto destination_cell = cells[cells.find(new_destination)];
-        // check if the destination is occluded
-        if (destination_cell.occluded) {
-            cout << " destination " << new_destination << " is occluded " << endl;
-            return false;
-        }
         destination = new_destination;
         destination_timer.reset();
         new_destination_data = true;
@@ -148,18 +137,12 @@ namespace controller {
         return false;
     }
 
-    void Controller_server::set_world(const World_info &world_info) {
-        world_configuration = Resources::from("world_configuration").key(world_info.world_configuration).get_resource<World_configuration>();
-        world_implementation = Resources::from("world_implementation").key(world_info.world_configuration).key(world_info.world_implementation).get_resource<World_implementation>();
-        occlusions = Resources::from("cell_group").key(world_info.world_configuration).key(world_info.occlusions).key("occlusions").get_resource<Cell_group_builder>();
-        world = World(world_configuration,world_implementation, occlusions);
+    void Controller_server::set_occlusions(const std::string &occlusions) {
+        auto occlusions_cgb = Resources::from("cell_group").key("hexagonal").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
+        world.set_occlusions(occlusions_cgb);
         cells = world.create_cell_group();
-        map = Map(cells);
-        paths = Paths(world.create_paths(Resources::from("paths").key(world_info.world_configuration).key(world_info.occlusions).key("astar").get_resource<Path_builder>()));
-        visibility = Location_visibility(cells, world.cell_shape, world.cell_transformation);
+        paths = Paths(world.create_paths(Resources::from("paths").key("hexagonal").key(occlusions).key("astar").get_resource<Path_builder>()));
         navigability = Location_visibility(cells, world.cell_shape,Transformation(world.cell_transformation.size * 1.25, world.cell_transformation.rotation));
-        capture = Capture(Resources::from("capture_parameters").key("default").get_resource<Capture_parameters>(), world);
-        peeking = Peeking(Resources::from("peeking_parameters").key("default").get_resource<Peeking_parameters>(),world);
     }
 
     void Controller_server::join() {
@@ -220,7 +203,7 @@ namespace controller {
     void Controller_server::Controller_experiment_client::on_episode_started(const string &experiment_name) {
         experiment::Start_experiment_response experiment;
         experiment.load(get_experiment_file(experiment_name));
-        controller_server->set_world(experiment.world);
+        controller_server->set_occlusions(experiment.world.occlusions);
         Experiment_client::on_episode_started(experiment_name);
     }
 

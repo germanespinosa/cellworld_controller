@@ -54,7 +54,7 @@ namespace controller {
         bool set_destination(const cell_world::Location &);
         bool pause();
         bool resume();
-        void set_world(const cell_world::World_info&);
+        void set_occlusions(const std::string &occlusions);
         bool set_behavior(int behavior);
         void join();
         cell_world::Location destination;
@@ -62,6 +62,17 @@ namespace controller {
         bool new_destination_data;
         std::atomic<Controller_state> state;
         Agent &agent;
+        Behavior behavior = Explore;
+        cell_world::World world;
+        cell_world::Cell_group cells;
+        cell_world::Paths paths;
+        cell_world::Map map;
+
+
+        cell_world::Location_visibility navigability;
+        Pid_controller pid_controller;
+        cell_world::Cell_group_builder occlusions;
+        std::thread process;
 
         struct Controller_experiment_client : experiment::Experiment_client {
             explicit Controller_experiment_client();
@@ -69,22 +80,6 @@ namespace controller {
             void on_episode_started(const std::string &experiment_name) override;
             Controller_server *controller_server;
         } &experiment_client;
-
-        Behavior behavior = Explore;
-        cell_world::Peeking peeking;
-        cell_world::Location_visibility visibility;
-        cell_world::Location_visibility navigability;
-        Pid_controller pid_controller;
-        cell_world::World_configuration world_configuration;
-        cell_world::World_implementation world_implementation;
-        cell_world::Cell_group_builder occlusions;
-        cell_world::World world;
-        cell_world::Cell_group cells;
-        cell_world::Paths paths;
-        cell_world::Map map;
-        cell_world::Capture capture;
-        std::thread process;
-        cell_world::Location get_next_stop();
 
         struct Controller_tracking_client : agent_tracking::Tracking_client {
             Controller_tracking_client(cell_world::Location_visibility &visibility,
@@ -113,11 +108,14 @@ namespace controller {
             cell_world::Peeking &peeking;
         } &tracking_client;
 
-        Controller_server(const std::string &pid_config_file_path, Agent &, Controller_tracking_client &, Controller_experiment_client &);
+        Controller_server(const std::string &pid_config_file_path,
+                          Agent &,
+                          Controller_tracking_client &,
+                          Controller_experiment_client &);
 
 
         void controller_process();
-
+        cell_world::Location get_next_stop();
 
         template< typename T, typename... Ts>
         T &create_local_client(Ts... vs){
