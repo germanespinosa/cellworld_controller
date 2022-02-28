@@ -13,7 +13,7 @@ namespace controller{
         }
         in = inputs;
         auto dist = inputs.location.dist(inputs.destination);
-        int cell_size = 0.054 * 1.5;
+        float cell_size = 0.054 * 1.5;
         if (dist < cell_size) {   // world.implementation.cell_transformation.size (how pass world)
             out.left = 0;
             out.right = 0;
