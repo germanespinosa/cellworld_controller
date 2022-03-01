@@ -190,6 +190,39 @@ namespace controller {
         Tracking_client::on_step(step);
     }
 
+    Controller_server::Controller_tracking_client::Controller_tracking_client(Location_visibility &visibility,
+                                                                              float view_angle,
+                                                                              Capture &capture,
+                                                                              Peeking &peeking,
+                                                                              const string &agent_name,
+                                                                              const string &adversary_name)  :
+            agent(agent_name),
+            adversary(adversary_name),
+            visibility(visibility),
+            view_angle(view_angle),
+            capture(capture),
+            peeking(peeking){
+    }
+
+    Controller_server::Controller_tracking_client::Controller_tracking_client(cell_world::World world,
+                                                                              float view_angle,
+                                                                              const string &agent_name,
+                                                                              const string &adversary_name):
+            agent(agent_name),
+            adversary(adversary_name),
+            visibility(world.create_cell_group(), world.cell_shape, world.cell_transformation),
+            view_angle(view_angle),
+            capture(Resources::from("capture_parameters").key("default").get_resource<Capture_parameters>(), world),
+            peeking(Resources::from("peeking_parameters").key("default").get_resource<Peeking_parameters>(), world){
+
+    }
+
+    void Controller_server::Controller_tracking_client::set_occlusions(Cell_group &cells) {
+        visibility.update_occlusions(cells);
+        capture.visibility.update_occlusions(cells);
+        peeking.peeking_visibility.update_occlusions(cells);
+    }
+
     string get_experiment_file(const string &experiment_name){
         return logs_path + experiment_name + ".json";
     }

@@ -86,16 +86,13 @@ namespace controller {
                                cell_world::Capture &capture,
                                cell_world::Peeking &peeking,
                                const std::string &agent_name,
-                               const std::string &adversary_name) :
-            agent(agent_name),
-            adversary(adversary_name),
-            visibility(visibility),
-            view_angle(view_angle),
-            capture(capture),
-            peeking(peeking){
-            }
+                               const std::string &adversary_name);
+            Controller_tracking_client(cell_world::World,
+                                       float view_angle,
+                                       const std::string &agent_name,
+                                       const std::string &adversary_name);
             void on_step(const cell_world::Step &step) override;
-            void set_world(cell_world::World &);
+            void set_occlusions(cell_world::Cell_group &);
             Agent_data agent;
             Agent_data adversary;
             cell_world::Location_visibility visibility;
