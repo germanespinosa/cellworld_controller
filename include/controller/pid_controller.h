@@ -32,15 +32,21 @@ namespace controller {
     // values located in robot_library/config/pid.json
     struct Pid_parameters : json_cpp::Json_object{
         Json_object_members(
-                Add_member(P_value);
-                Add_member(I_value);
-                Add_member(D_value);
+                Add_member(P_pursue);
+                Add_member(I_pursue);
+                Add_member(D_pursue);
+                Add_member(P_explore);
+                Add_member(I_explore);
+                Add_member(D_explore);
                 Add_member(pursue_speed);
                 Add_member(explore_speed);
                 );
-        double P_value;
-        double I_value;
-        double D_value;
+        double P_pursue;
+        double I_pursue;
+        double D_pursue;
+        double P_explore;
+        double I_explore;
+        double D_explore;
         double pursue_speed;
         double explore_speed;
     };
