@@ -95,13 +95,14 @@ namespace controller {
             peeking(peeking){
             }
             void on_step(const cell_world::Step &step) override;
+            void set_world(cell_world::World &);
             Agent_data agent;
             Agent_data adversary;
-            cell_world::Location_visibility &visibility;
+            cell_world::Location_visibility visibility;
             Controller_server *controller_server;
             float view_angle;
-            cell_world::Capture &capture;
-            cell_world::Peeking &peeking;
+            cell_world::Capture capture;
+            cell_world::Peeking peeking;
         } &tracking_client;
 
         Controller_server(const std::string &pid_config_file_path,
