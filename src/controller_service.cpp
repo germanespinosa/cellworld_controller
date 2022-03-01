@@ -166,6 +166,10 @@ namespace controller {
         }
     }
 
+    void Controller_server::set_occlusions(Cell_group &cells) {
+        navigability.update_occlusions(cells);
+    }
+
     void Controller_server::Controller_tracking_client::on_step(const Step &step) {
         if (step.agent_name == agent.agent_name) {
             controller_server->send_step(step);
@@ -241,7 +245,6 @@ namespace controller {
     }
 
     Controller_server::Controller_experiment_client::Controller_experiment_client() {
-
     }
 }
 

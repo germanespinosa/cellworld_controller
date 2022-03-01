@@ -57,21 +57,6 @@ namespace controller {
         void set_occlusions(const std::string &occlusions);
         bool set_behavior(int behavior);
         void join();
-        cell_world::Location destination;
-        cell_world::Timer destination_timer;
-        bool new_destination_data;
-        std::atomic<Controller_state> state;
-        Agent &agent;
-        Behavior behavior = Explore;
-        cell_world::World world;
-        cell_world::Cell_group cells;
-        cell_world::Paths paths;
-        cell_world::Map map;
-
-
-        cell_world::Location_visibility navigability;
-        Pid_controller pid_controller;
-        std::thread process;
 
         struct Controller_experiment_client : experiment::Experiment_client {
             explicit Controller_experiment_client();
@@ -140,5 +125,23 @@ namespace controller {
         std::vector<Controller_client * > local_clients;
         std::vector<Controller_client * > subscribed_local_clients;
 
+
+        void set_occlusions(cell_world::Cell_group &);
+
+        cell_world::Location destination;
+        cell_world::Timer destination_timer;
+        bool new_destination_data;
+        std::atomic<Controller_state> state;
+        Agent &agent;
+        Behavior behavior = Explore;
+        cell_world::World world;
+        cell_world::Cell_group cells;
+        cell_world::Paths paths;
+        cell_world::Map map;
+
+
+        cell_world::Location_visibility navigability;
+        Pid_controller pid_controller;
+        std::thread process;
     };
 }
