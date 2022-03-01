@@ -5,11 +5,17 @@ using namespace cell_world;
 namespace controller{
 
     Pid_outputs Pid_controller::process(const Pid_inputs &inputs, Behavior behavior) {
-        double speed;
+        double speed, P_value, I_value, D_value;
         if (behavior==Explore){
             speed = parameters.explore_speed;
+            P_value = parameters.P_explore;
+            I_value = parameters.I_explore;
+            D_value = parameters.D_explore;
         } else {
             speed = parameters.pursue_speed;
+            P_value = parameters.P_pursue;
+            I_value = parameters.I_pursue;
+            D_value = parameters.D_pursue;
         }
         in = inputs;
         auto dist = inputs.location.dist(inputs.destination);
@@ -26,7 +32,7 @@ namespace controller{
         error_derivative = last_error - error;
         last_error = error;
         error_integral += error;
-        double adjustment = error * parameters.P_value - error_derivative * parameters.D_value + error_integral * parameters.I_value;
+        double adjustment = error * P_value - error_derivative * D_value + error_integral * I_value;
         out.left =  normalized_error * speed * ( dist + 1 ) - adjustment;
         // catches outliers
         if (out.left < -1) {
