@@ -228,7 +228,7 @@ namespace controller {
     }
 
     string get_experiment_file(const string &experiment_name){
-        return logs_path + experiment_name + ".json";
+        return logs_path + experiment_name + "_controller.json";
     }
 
     void Controller_server::Controller_experiment_client::on_experiment_started(
