@@ -9,7 +9,7 @@ if not path.exists('setup/setup.py') or path.getctime('__info__.py') > path.getc
 module.create_setup_files('../setup')
 build = module.build_module('python-build')
 if build:
-	print('build succeded')
+	print('build succeeded')
 	if '-upload' in sys.argv:
 		import os
 		username = ''
