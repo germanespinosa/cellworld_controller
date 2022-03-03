@@ -75,7 +75,6 @@ namespace controller {
         state = Controller_state::Playing;
         Pid_inputs pi;
         while(state != Controller_state::Stopped){
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
             // if there is no information from the tracker
             if (!tracking_client.agent.is_valid() ||
                 state == Controller_state::Paused ||
@@ -84,16 +83,18 @@ namespace controller {
                 agent.set_right(0);
                 agent.update();
                 continue;
+            } else {
+                //PID controller
+                pi.location = tracking_client.agent.step.location;
+                pi.rotation = tracking_client.agent.step.rotation;
+                pi.destination = get_next_stop();
+                auto robot_command = pid_controller.process(pi, behavior);
+                agent.set_left(robot_command.left);
+                agent.set_right(robot_command.right);
+                agent.update();
             }
-
-            //PID controller
-            pi.location = tracking_client.agent.step.location;
-            pi.rotation = tracking_client.agent.step.rotation;
-            pi.destination = get_next_stop();
-            auto robot_command = pid_controller.process(pi, behavior);
-            agent.set_left(robot_command.left);
-            agent.set_right(robot_command.right);
-            agent.update();
+            //prevents overflowing the robot ( max 10 commands per second)
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
