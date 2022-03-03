@@ -1,5 +1,5 @@
 def __module_version__():
-	return 0, 0, 3 
+	return 0, 0, 5 
 
 
 def __module_name__():
@@ -19,7 +19,7 @@ def __package_description__():
 
 
 def __install_requires__():
-	return None 
+	return ['cellworld_experiment_service'] 
 
 
 def __url__():
