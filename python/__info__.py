@@ -1,5 +1,5 @@
 def __module_version__():
-	return 0, 0, 5 
+	return 0, 0, 7 
 
 
 def __module_name__():
@@ -15,7 +15,7 @@ def __author_email__():
 
 
 def __package_description__():
-	return '' 
+	return 'Controller client' 
 
 
 def __install_requires__():
@@ -27,7 +27,7 @@ def __url__():
 
 
 def __license__():
-	return '' 
+	return 'MIT' 
 
 
 def __license_file__():
@@ -59,6 +59,6 @@ def __root_folder__():
 
 
 def __description__():
-	return '' 
+	return 'Controller client' 
 
 
