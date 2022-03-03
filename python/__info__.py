@@ -1,9 +1,9 @@
 def __module_version__():
-	return 0, 0, 9 
+	return 0, 0, 11 
 
 
 def __module_name__():
-	return 'cellworld_cotroller_service' 
+	return 'cellworld-controller-service' 
 
 
 def __author__():
