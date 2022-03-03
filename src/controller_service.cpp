@@ -66,6 +66,7 @@ namespace controller {
     {
         tracking_client.controller_server = this;
         experiment_client.controller_server = this;
+        experiment_client.subscribe();
         tracking_client.subscribe();
         state = Controller_state::Stopped;
         process = thread(&Controller_server::controller_process, this);
