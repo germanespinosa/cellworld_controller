@@ -196,7 +196,7 @@ namespace controller {
                 if (is_captured)
                     controller_server->send_capture(step.frame);
                 if (visibility.is_visible(predator.location, step.location) &&
-                    angle_difference(predator.location.atan(step.location), predator.rotation) < view_angle) {
+                        to_degrees(angle_difference(predator.location.atan(step.location), to_radians(predator.rotation))) < view_angle) {
                     if (peeking.is_seen(predator.location, step.location)) {
                         if (adversary.last_update.to_seconds()>.1) {
                             controller_server->send_step(step);
