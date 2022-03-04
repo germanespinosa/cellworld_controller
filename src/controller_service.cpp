@@ -61,7 +61,7 @@ namespace controller {
             navigability(cells, world.cell_shape,Transformation(world.cell_transformation.size, world.cell_transformation.rotation)),
             pid_controller (Json_from_file<Pid_parameters>(pid_config_file_path)),
             tracking_client(tracking_client),
-            destination_timer(5),
+            destination_timer(0),
             experiment_client(experiment_client)
     {
         tracking_client.controller_server = this;
@@ -108,7 +108,7 @@ namespace controller {
     bool Controller_server::set_destination(const cell_world::Location &new_destination) {
         cout << "New destination: " << new_destination << endl;
         destination = new_destination;
-        destination_timer.reset();
+        destination_timer = Timer(5);
         new_destination_data = true;
         return true;
     }
@@ -150,7 +150,7 @@ namespace controller {
         auto occlusions_cgb = Resources::from("cell_group").key("hexagonal").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
         world.set_occlusions(occlusions_cgb);
         cells = world.create_cell_group();
-        paths = Paths(world.create_paths(Resources::from("paths").key("hexagonal").key(occlusions).key("astar").key("robot").get_resource<Path_builder>()));
+        paths = Paths(world.create_paths(Resources::from("paths").key("hexagonal").key(occlusions).key("astar").get_resource<Path_builder>()));
         navigability = Location_visibility(cells, world.cell_shape,Transformation(world.cell_transformation.size * 1.4, world.cell_transformation.rotation)); // robot size
     }
 
