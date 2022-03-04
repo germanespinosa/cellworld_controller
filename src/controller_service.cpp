@@ -150,7 +150,7 @@ namespace controller {
         auto occlusions_cgb = Resources::from("cell_group").key("hexagonal").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
         world.set_occlusions(occlusions_cgb);
         cells = world.create_cell_group();
-        paths = Paths(world.create_paths(Resources::from("paths").key("hexagonal").key(occlusions).key("astar").get_resource<Path_builder>()));
+        paths = Paths(world.create_paths(Resources::from("paths").key("hexagonal").key(occlusions).key("astar").key("robot").get_resource<Path_builder>()));
         navigability = Location_visibility(cells, world.cell_shape,Transformation(world.cell_transformation.size * 1.4, world.cell_transformation.rotation)); // robot size
     }
 
