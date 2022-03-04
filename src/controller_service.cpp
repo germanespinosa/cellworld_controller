@@ -66,6 +66,7 @@ namespace controller {
     {
         tracking_client.controller_server = this;
         experiment_client.controller_server = this;
+        experiment_client.subscribe();
         tracking_client.subscribe();
         state = Controller_state::Stopped;
         process = thread(&Controller_server::controller_process, this);
@@ -75,7 +76,6 @@ namespace controller {
         state = Controller_state::Playing;
         Pid_inputs pi;
         while(state != Controller_state::Stopped){
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
             // if there is no information from the tracker
             if (!tracking_client.agent.is_valid() ||
                 state == Controller_state::Paused ||
@@ -84,16 +84,18 @@ namespace controller {
                 agent.set_right(0);
                 agent.update();
                 continue;
+            } else {
+                //PID controller
+                pi.location = tracking_client.agent.step.location;
+                pi.rotation = tracking_client.agent.step.rotation;
+                pi.destination = get_next_stop();
+                auto robot_command = pid_controller.process(pi, behavior);
+                agent.set_left(robot_command.left);
+                agent.set_right(robot_command.right);
+                agent.update();
             }
-
-            //PID controller
-            pi.location = tracking_client.agent.step.location;
-            pi.rotation = tracking_client.agent.step.rotation;
-            pi.destination = get_next_stop();
-            auto robot_command = pid_controller.process(pi, behavior);
-            agent.set_left(robot_command.left);
-            agent.set_right(robot_command.right);
-            agent.update();
+            //prevents overflowing the robot ( max 10 commands per second)
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
@@ -172,10 +174,15 @@ namespace controller {
 
     void Controller_server::Controller_tracking_client::on_step(const Step &step) {
         if (step.agent_name == agent.agent_name) {
-            controller_server->send_step(step);
+            if (agent.last_update.to_seconds()>.1) {
+                controller_server->send_step(step);
+                agent.last_update.reset();
+            }
             agent.step = step;
             agent.timer = Timer(.5);
         } else if (step.agent_name == adversary.agent_name) {
+            adversary.step = step;
+            adversary.timer = Timer(.5);
             if (contains_agent_state(agent.agent_name)) {
                 auto predator = get_current_state(agent.agent_name);
                 auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
@@ -184,7 +191,10 @@ namespace controller {
                 if (visibility.is_visible(predator.location, step.location) &&
                     angle_difference(predator.location.atan(step.location), predator.rotation) < view_angle) {
                     if (peeking.is_seen(predator.location, step.location)) {
-                        controller_server->send_step(step);
+                        if (adversary.last_update.to_seconds()>.1) {
+                            controller_server->send_step(step);
+                            adversary.last_update.reset();
+                        }
                     }
                 } else {
                     peeking.not_visible();
@@ -228,7 +238,7 @@ namespace controller {
     }
 
     string get_experiment_file(const string &experiment_name){
-        return logs_path + experiment_name + ".json";
+        return logs_path + experiment_name + "_controller.json";
     }
 
     void Controller_server::Controller_experiment_client::on_experiment_started(

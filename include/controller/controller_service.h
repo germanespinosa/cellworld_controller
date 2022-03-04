@@ -43,6 +43,7 @@ namespace controller {
         std::string agent_name;
         cell_world::Step step;
         cell_world::Timer timer;
+        cell_world::Timer last_update;
         bool is_valid() {
             return !timer.time_out();
         }
