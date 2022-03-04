@@ -145,7 +145,7 @@ namespace controller {
         world.set_occlusions(occlusions_cgb);
         cells = world.create_cell_group();
         paths = Paths(world.create_paths(Resources::from("paths").key("hexagonal").key(occlusions).key("astar").get_resource<Path_builder>()));
-        navigability = Location_visibility(cells, world.cell_shape,Transformation(world.cell_transformation.size * 1.5, world.cell_transformation.rotation)); // robot size
+        navigability = Location_visibility(cells, world.cell_shape,Transformation(world.cell_transformation.size * 1.4, world.cell_transformation.rotation)); // robot size
     }
 
     void Controller_server::join() {
