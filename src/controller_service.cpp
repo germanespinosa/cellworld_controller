@@ -88,10 +88,17 @@ namespace controller {
                 pi.location = tracking_client.agent.step.location;
                 pi.rotation = tracking_client.agent.step.rotation;
                 pi.destination = get_next_stop();
-                auto robot_command = pid_controller.process(pi, behavior);
-                agent.set_left(robot_command.left);
-                agent.set_right(robot_command.right);
-                agent.update();
+                if (pi.destination.dist(pi.location) < world.cell_transformation.size / 2)
+                {
+                    agent.set_left(0);
+                    agent.set_right(0);
+                    agent.update();
+                } else {
+                    auto robot_command = pid_controller.process(pi, behavior);
+                    agent.set_left(robot_command.left);
+                    agent.set_right(robot_command.right);
+                    agent.update();
+                }
             }
             //prevents overflowing the robot ( max 10 commands per second)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));

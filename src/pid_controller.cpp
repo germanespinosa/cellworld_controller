@@ -19,12 +19,6 @@ namespace controller{
         }
         in = inputs;
         auto dist = inputs.location.dist(inputs.destination);
-        float cell_size = 0.054 * 1.5;
-        if (dist < cell_size) {   // world.implementation.cell_transformation.size (how pass world)
-            out.left = 0;
-            out.right = 0;
-            return out;
-        }
         double destination_theta = inputs.location.atan(inputs.destination);
         auto theta = to_radians(inputs.rotation);
         error = angle_difference(theta, destination_theta) * direction(theta, destination_theta);
