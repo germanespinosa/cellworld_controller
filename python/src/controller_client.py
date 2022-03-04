@@ -12,7 +12,6 @@ class ControllerClient(MessageClient):
         self.on_step = None
         self.on_world_update = None
         self.router.add_route("_step$", self.__process_step__, Step)
-        self.router.add_route("world_update", self.__process_world_update__, World_info)
 
     def __process_step__(self, step):
         if self.on_step:
@@ -33,12 +32,6 @@ class ControllerClient(MessageClient):
 
     def set_destination(self, new_destination: Location) -> bool:
         return self.send_request(Message("set_destination", new_destination)).get_body(bool)
-
-    def prey_acquired(self) -> bool:
-        return self.send_request(Message("prey_acquired")).get_body(bool)
-
-    def get_world_info(self) -> World_info:
-        return self.send_request(Message("get_world_info")).get_body(World_info)
 
     def set_behavior(self, behavior: int) -> bool:
         return self.send_request(Message("set_behavior", behavior)).get_body(bool)

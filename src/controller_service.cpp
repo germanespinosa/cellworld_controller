@@ -167,12 +167,6 @@ namespace controller {
 
     void Controller_server::send_capture(int frame) {
         experiment_client.capture(frame);
-        if (!clients.empty()){
-            broadcast_subscribed(Message("prey_captured", frame));
-        }
-        for (auto local_client: subscribed_local_clients){
-            local_client->on_prey_captured(frame);
-        }
     }
 
     void Controller_server::set_occlusions(Cell_group &cells) {

@@ -9,10 +9,8 @@ namespace controller{
     struct Controller_client : tcp_messages::Message_client {
         Routes(
                 Add_route("(.*)(step)", on_step, cell_world::Step);
-                Add_route("prey_captured", on_prey_captured, int);
                 )
         virtual void on_step(const cell_world::Step &) {}
-        virtual void on_prey_captured(int) {}
         bool pause();
         bool resume();
         bool stop();
