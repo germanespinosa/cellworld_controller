@@ -100,6 +100,7 @@ namespace controller {
     }
 
     bool Controller_server::set_destination(const cell_world::Location &new_destination) {
+        cout << "New destination: " << new_destination << endl;
         destination = new_destination;
         destination_timer.reset();
         new_destination_data = true;
