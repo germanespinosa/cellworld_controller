@@ -83,7 +83,6 @@ namespace controller {
                 agent.set_left(0);
                 agent.set_right(0);
                 agent.update();
-                continue;
             } else {
                 //PID controller
                 pi.location = tracking_client.agent.step.location;
