@@ -88,7 +88,8 @@ namespace controller {
                 pi.location = tracking_client.agent.step.location;
                 pi.rotation = tracking_client.agent.step.rotation;
                 pi.destination = get_next_stop();
-                if (destination.dist(pi.location) < world.cell_transformation.size / 2)
+                auto dist = destination.dist(pi.location);
+                if (dist < world.cell_transformation.size / 2)
                 {
                     agent.set_left(0);
                     agent.set_right(0);
