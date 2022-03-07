@@ -5,8 +5,8 @@
 namespace controller {
 
     enum Behavior{
-        Pursue,
-        Explore
+        Explore,
+        Pursue
     };
 
     struct Pid_outputs : json_cpp::Json_object{
