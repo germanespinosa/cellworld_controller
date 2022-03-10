@@ -26,6 +26,10 @@ namespace controller {
         return ((Controller_server *) _server)->resume();
     }
 
+    bool Controller_service::joystick_control() {
+        return ((Controller_server *) _server)->joystick_control();
+    }
+
     int Controller_service::get_port() {
         string port_str(std::getenv("CONTROLLER_PORT") ? std::getenv("CONTROLLER_PORT") : "4590");
         return atoi(port_str.c_str());
@@ -142,6 +146,14 @@ namespace controller {
     bool Controller_server::resume() {
         if (state == Controller_state::Paused) {
             state = Controller_state::Playing;
+            return true;
+        }
+        return false;
+    }
+
+    bool Controller_server::joystick_control(){
+        if (state == Controller_state::Joystick) {
+            cout << "joystick_control" << endl;
             return true;
         }
         return false;
