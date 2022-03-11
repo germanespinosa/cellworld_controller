@@ -152,8 +152,8 @@ namespace controller {
     }
 
     bool Controller_server::joystick_control(){
-        if (state == Controller_state::Joystick) {
-            cout << "joystick_control" << endl;
+        if (state == Controller_state::Playing || state == Controller_state::Paused) {
+            state == Controller_state::Joystick;
             return true;
         }
         return false;
