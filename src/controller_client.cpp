@@ -35,7 +35,7 @@ namespace controller {
     bool Controller_client::joystick_control() {
         if (local_server)
         {
-            return local_server->pause();
+            return local_server->joystick_control();
         }else {
             return send_request(Message("joystick_control")).get_body<bool>();
         }
