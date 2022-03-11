@@ -1,5 +1,8 @@
 #include <controller/controller_service.h>
 #include <filesystem>
+#include <iostream>
+//#include <robot_lib/gamepad_wrapper.h>
+
 
 using namespace cell_world;
 using namespace tcp_messages;
@@ -26,9 +29,6 @@ namespace controller {
         return ((Controller_server *) _server)->resume();
     }
 
-    bool Controller_service::joystick_control() {
-        return ((Controller_server *) _server)->joystick_control();
-    }
 
     int Controller_service::get_port() {
         string port_str(std::getenv("CONTROLLER_PORT") ? std::getenv("CONTROLLER_PORT") : "4590");
@@ -151,13 +151,6 @@ namespace controller {
         return false;
     }
 
-    bool Controller_server::joystick_control(){
-        if (state == Controller_state::Playing || state == Controller_state::Paused) {
-            state == Controller_state::Joystick;
-            return true;
-        }
-        return false;
-    }
 
     void Controller_server::set_occlusions(const std::string &occlusions) {
         auto occlusions_cgb = Resources::from("cell_group").key("hexagonal").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();

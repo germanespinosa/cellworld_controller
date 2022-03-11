@@ -32,14 +32,7 @@ namespace controller {
             return send_request(Message("stop_predator")).get_body<bool>();
         }
     }
-    bool Controller_client::joystick_control() {
-        if (local_server)
-        {
-            return local_server->joystick_control();
-        }else {
-            return send_request(Message("joystick_control")).get_body<bool>();
-        }
-    }
+
 
     bool Controller_client::set_destination(const cell_world::Location &location) {
         if (local_server)

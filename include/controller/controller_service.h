@@ -13,7 +13,6 @@ namespace controller {
         Stopped,
         Playing,
         Paused,
-        Joystick,
     };
 
     struct Controller_service : tcp_messages::Message_service {
@@ -22,7 +21,6 @@ namespace controller {
             Add_route_with_response("stop", stop_controller);
             Add_route_with_response("pause", pause_controller);
             Add_route_with_response("resume", resume_controller);
-            Add_route_with_response("joystick_control", joystick_control);
             Add_route_with_response("set_behavior", set_behavior, int);
             Allow_subscription();
         );
@@ -31,7 +29,6 @@ namespace controller {
         bool stop_controller();
         bool pause_controller();
         bool resume_controller();
-        bool joystick_control();
         bool set_behavior(int);
         static int get_port();
         static void set_logs_folder(const std::string &);
@@ -58,7 +55,6 @@ namespace controller {
         bool set_destination(const cell_world::Location &);
         bool pause();
         bool resume();
-        bool joystick_control();
         void set_occlusions(const std::string &occlusions);
         bool set_behavior(int behavior);
         void join();
