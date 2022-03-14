@@ -108,6 +108,9 @@ namespace controller {
                     agent.set_right(robot_command.right);
                     agent.update();
                 }
+                if (state == Controller_state::Joystick){
+                    cout << "JOYSTCIK" << endl;
+                }
             }
             //prevents overflowing the robot ( max 10 commands per second)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
