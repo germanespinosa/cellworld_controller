@@ -169,7 +169,7 @@ namespace controller {
     }
 
 
-    void Controller_server::set_occlusions(const std::string &occlusions) {
+    void Controller_server::set_occlusions(const std::string &occlusions, float margin) {
         auto occlusions_cgb = Resources::from("cell_group").key("hexagonal").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
         world.set_occlusions(occlusions_cgb);
         cells = world.create_cell_group();
