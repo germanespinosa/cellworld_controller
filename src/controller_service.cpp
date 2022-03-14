@@ -35,7 +35,7 @@ namespace controller {
 
     bool Controller_service::set_behavior(int behavior) {
         return ((Controller_server *) _server)->set_behavior(behavior);
-}
+    }
 
     void Controller_service::set_logs_folder(const string &path) {
         logs_path = path;
@@ -50,6 +50,8 @@ namespace controller {
             local_client->on_step(step);
         }
     }
+
+
 
     Controller_server::Controller_server(const string &pid_config_file_path,
                                          Agent &agent,
@@ -149,20 +151,7 @@ namespace controller {
         return false;
     }
 
-<<<<<<< HEAD
-    void Controller_server::set_occlusions(const std::string &occlusions) {
-=======
-    bool Controller_server::joystick(){
-        if (state == Controller_state::Paused || state == Controller_state::Playing) {
-            state = Controller_state::Joystick;
-            return true;
-        }
-        return false;
-    }
-
-
     void Controller_server::set_occlusions(const std::string &occlusions, float margin) {
->>>>>>> 0c8215492fe3ce1b85213abf4180e50f48448c89
         auto occlusions_cgb = Resources::from("cell_group").key("hexagonal").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
         world.set_occlusions(occlusions_cgb);
         cells = world.create_cell_group();
