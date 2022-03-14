@@ -35,3 +35,6 @@ class ControllerClient(MessageClient):
 
     def set_behavior(self, behavior: int) -> bool:
         return self.send_request(Message("set_behavior", behavior)).get_body(bool)
+
+    def joystick_control(self) -> bool:
+        return self.send_request(Message("joystick_control")).get_body(bool)
