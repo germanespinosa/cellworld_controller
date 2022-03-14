@@ -51,4 +51,13 @@ namespace controller {
             return send_request(Message("set_behavior", behavior)).get_body<bool>();
         }
     }
+
+    bool Controller_client::joystick_control(){
+        if (local_server)
+        {
+            return local_server->joystick_control();
+        }else {
+            return send_request(Message("joystick_control")).get_body<bool>();
+        }
+    }
 }

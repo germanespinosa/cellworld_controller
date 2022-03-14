@@ -29,6 +29,10 @@ namespace controller {
         return ((Controller_server *) _server)->resume();
     }
 
+    bool Controller_service::joystick_control() {
+        return ((Controller_server *) _server)->joystick_control();    ///////////////////////////////////////////////////////////////
+    }
+
 
     int Controller_service::get_port() {
         string port_str(std::getenv("CONTROLLER_PORT") ? std::getenv("CONTROLLER_PORT") : "4590");
@@ -76,7 +80,7 @@ namespace controller {
         process = thread(&Controller_server::controller_process, this);
     }
 
-    void Controller_server::controller_process() {
+    void Controller_server::controller_process() {                      // setting robot velocity
         state = Controller_state::Playing;
         Pid_inputs pi;
         while(state != Controller_state::Stopped){
@@ -146,6 +150,14 @@ namespace controller {
     bool Controller_server::resume() {
         if (state == Controller_state::Paused) {
             state = Controller_state::Playing;
+            return true;
+        }
+        return false;
+    }
+
+    bool Controller_server::joystick_control(){
+        if (state == Controller_state::Paused || state == Controller_state::Playing) {
+            state = Controller_state::Joystick;
             return true;
         }
         return false;
