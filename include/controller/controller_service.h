@@ -23,7 +23,7 @@ namespace controller {
             Add_route_with_response("pause", pause_controller);
             Add_route_with_response("resume", resume_controller);
             Add_route_with_response("set_behavior", set_behavior, int);
-            //Add_route_with_response("joystick_control", joystick_control);
+            Add_route_with_response("joystick_control", joystick_control);
             Allow_subscription();
         );
 
@@ -33,7 +33,7 @@ namespace controller {
         bool resume_controller();
         bool set_behavior(int);
         static int get_port();
-        //bool joystick_control();
+        bool joystick_control();
         static void set_logs_folder(const std::string &);
     };
 
