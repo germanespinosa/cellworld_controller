@@ -29,9 +29,9 @@ namespace controller {
         return ((Controller_server *) _server)->resume();
     }
 
-//    bool Controller_service::joystick_control() {
-//        return ((Controller_server *) _server)->joystick_control();
-//    }
+    bool Controller_service::joystick_control() {
+        return ((Controller_server *) _server)->joystick();
+    }
 
 
     int Controller_service::get_port() {
@@ -108,12 +108,12 @@ namespace controller {
                     agent.set_right(robot_command.right);
                     agent.update();
                 }
-//                if (state == Controller_state::Joystick){
-//                    cout << "JOYSTCIK" << endl;
-//                    agent.set_left(90);
-//                    agent.set_right(90);
-//                    agent.update();
-//                }
+                if (state == Controller_state::Joystick){
+                    cout << "JOYSTCIK" << endl;
+                    agent.set_left(90);
+                    agent.set_right(90);
+                    agent.update();
+                }
             }
             //prevents overflowing the robot ( max 10 commands per second)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -161,13 +161,13 @@ namespace controller {
         return false;
     }
 
-//    bool Controller_server::joystick_control(){
-//        if (state == Controller_state::Paused || state == Controller_state::Playing) {
-//            state = Controller_state::Joystick;
-//            return true;
-//        }
-//        return false;
-//    }
+    bool Controller_server::joystick(){
+        if (state == Controller_state::Paused || state == Controller_state::Playing) {
+            state = Controller_state::Joystick;
+            return true;
+        }
+        return false;
+    }
 
 
     void Controller_server::set_occlusions(const std::string &occlusions) {
