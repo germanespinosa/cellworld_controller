@@ -110,6 +110,8 @@ namespace controller {
                 }
                 if (state == Controller_state::Joystick){
                     cout << "JOYSTCIK" << endl;
+                    agent.set_left(90);
+                    agent.set_right(90);
                 }
             }
             //prevents overflowing the robot ( max 10 commands per second)
