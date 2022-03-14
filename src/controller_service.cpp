@@ -112,6 +112,7 @@ namespace controller {
                     cout << "JOYSTCIK" << endl;
                     agent.set_left(90);
                     agent.set_right(90);
+                    agent.update();
                 }
             }
             //prevents overflowing the robot ( max 10 commands per second)
