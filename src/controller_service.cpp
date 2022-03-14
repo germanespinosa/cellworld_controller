@@ -91,7 +91,7 @@ namespace controller {
                 agent.set_left(0);
                 agent.set_right(0);
                 agent.update();
-            } else {
+            } else if(state != Controller_state::Joystick) {
                 //PID controller
                 pi.location = tracking_client.agent.step.location;
                 pi.rotation = tracking_client.agent.step.rotation;
@@ -108,12 +108,10 @@ namespace controller {
                     agent.set_right(robot_command.right);
                     agent.update();
                 }
-                if (state == Controller_state::Joystick){
+            } else if(state == Controller_state::Joystick){
                     cout << "JOYSTCIK" << endl;
                     agent.set_left(90);
                     agent.set_right(90);
-                    agent.update();
-                }
             }
             //prevents overflowing the robot ( max 10 commands per second)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
