@@ -16,7 +16,6 @@ namespace controller{
         bool stop();
         bool set_destination(const cell_world::Location &);
         bool set_behavior(Behavior);
-        bool joystick();
         Controller_server *local_server = nullptr;
     };
 }

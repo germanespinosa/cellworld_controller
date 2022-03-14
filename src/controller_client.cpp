@@ -52,12 +52,4 @@ namespace controller {
         }
     }
 
-    bool Controller_client::joystick(){
-        if (local_server)
-        {
-            return local_server->joystick();
-        }else {
-            return send_request(Message("joystick_predator")).get_body<bool>();   // coping pause format exactly however this should be pause?
-        }
-    }
 }

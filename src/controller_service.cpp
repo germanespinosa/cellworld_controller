@@ -1,7 +1,6 @@
 #include <controller/controller_service.h>
 #include <filesystem>
 #include <iostream>
-//#include <robot_lib/gamepad_wrapper.h>
 
 
 using namespace cell_world;
@@ -28,11 +27,6 @@ namespace controller {
     bool Controller_service::resume_controller() {
         return ((Controller_server *) _server)->resume();
     }
-
-    bool Controller_service::joystick_control() {
-        return ((Controller_server *) _server)->joystick();
-    }
-
 
     int Controller_service::get_port() {
         string port_str(std::getenv("CONTROLLER_PORT") ? std::getenv("CONTROLLER_PORT") : "4590");
@@ -91,7 +85,7 @@ namespace controller {
                 agent.set_left(0);
                 agent.set_right(0);
                 agent.update();
-            } else if(state != Controller_state::Joystick) {
+            } else {
                 //PID controller
                 pi.location = tracking_client.agent.step.location;
                 pi.rotation = tracking_client.agent.step.rotation;
@@ -108,11 +102,6 @@ namespace controller {
                     agent.set_right(robot_command.right);
                     agent.update();
                 }
-            } else if(state == Controller_state::Joystick){
-                    cout << "JOYSTCIK" << endl;
-                    agent.set_left(90);
-                    agent.set_right(90);
-                    agent.update();
             }
             //prevents overflowing the robot ( max 10 commands per second)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -159,15 +148,6 @@ namespace controller {
         }
         return false;
     }
-
-    bool Controller_server::joystick(){
-        if (state == Controller_state::Paused || state == Controller_state::Playing) {
-            state = Controller_state::Joystick;
-            return true;
-        }
-        return false;
-    }
-
 
     void Controller_server::set_occlusions(const std::string &occlusions) {
         auto occlusions_cgb = Resources::from("cell_group").key("hexagonal").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
