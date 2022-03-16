@@ -55,7 +55,7 @@ namespace controller {
         bool set_destination(const cell_world::Location &);
         bool pause();
         bool resume();
-        void set_occlusions(const std::string &occlusions, float margin = .55);
+        void set_occlusions(const std::string &occlusions, float margin = .45);
         bool set_behavior(int behavior);
         void join();
 
