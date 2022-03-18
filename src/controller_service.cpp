@@ -118,6 +118,10 @@ namespace controller {
         return true;
     }
 
+#define goal_weight 0
+#define occlusion_weight .0001
+#define decay 2
+
     cell_world::Location Controller_server::get_next_stop() {
         auto agent_location = tracking_client.agent.step.location;
         if (navigability.is_visible(agent_location, destination)) {
@@ -132,7 +136,21 @@ namespace controller {
             if (move == Move{0,0}) break;
             next_stop_test = cells.find(map[cells[next_stop].coordinates + move]);
         }
-        return cells[next_stop].location;
+
+        auto total_gravity_change = Location(0,0);
+        for (auto &cell_r : cells.occluded_cells()) {
+            Cell cell = cell_r.get();
+            auto distance = cell.location.dist(agent_location);
+            auto theta = cell.location.atan(agent_location);
+            auto gravity = occlusion_weight / pow(distance,decay);
+            total_gravity_change = total_gravity_change.move(theta, gravity);
+        }
+        auto distance = cells[next_stop].location.dist(agent_location);
+        auto theta = agent_location.atan(cells[next_stop].location);
+        auto gravity = goal_weight / pow(distance,decay);
+        total_gravity_change = total_gravity_change.move(theta, gravity);
+
+        return cells[next_stop].location + total_gravity_change;
     }
 
     bool Controller_server::pause() {
