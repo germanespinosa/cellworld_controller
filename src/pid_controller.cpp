@@ -22,6 +22,7 @@ namespace controller{
         double destination_theta = inputs.location.atan(inputs.destination);
         auto theta = to_radians(inputs.rotation);
         error = angle_difference(theta, destination_theta) * direction(theta, destination_theta);
+
         normalized_error = normalize_error(error);
         error_derivative = last_error - error;
         last_error = error;
