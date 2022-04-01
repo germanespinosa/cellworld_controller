@@ -22,7 +22,7 @@ namespace controller{
         auto dist = inputs.location.dist(inputs.destination);
         double destination_theta = inputs.location.atan(inputs.destination);
         auto theta = to_radians(inputs.rotation);
-        cout << theta << " " << destination_theta << endl;
+        //cout << theta << " " << destination_theta << endl;
         error = angle_difference(theta, destination_theta) * direction(theta, destination_theta);
 
         normalized_error = normalize_error(error);
@@ -45,6 +45,7 @@ namespace controller{
         if (out.right > 1){
             out.right = 1;
         }
+        cout << out.left << " " << out.right << " " << theta << " " << destination_theta << " " << dist << endl;
         return out;
     }
 
