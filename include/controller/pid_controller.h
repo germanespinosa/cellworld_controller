@@ -72,5 +72,6 @@ namespace controller {
         double last_error{};
         Pid_outputs out;
         Pid_inputs in;
+        cell_world::Timer timer;
     };
 }

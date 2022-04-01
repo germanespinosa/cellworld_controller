@@ -7,6 +7,8 @@ namespace controller{
 
     Pid_outputs Pid_controller::process(const Pid_inputs &inputs, Behavior behavior) {
         double speed, P_value, I_value, D_value;
+        double t = timer.to_seconds() * 30;
+        timer.reset();
         if (behavior==Explore){
             speed = parameters.explore_speed;
             P_value = parameters.P_explore;
@@ -26,9 +28,9 @@ namespace controller{
         error = angle_difference(theta, destination_theta) * direction(theta, destination_theta);
 
         normalized_error = normalize_error(error);
-        error_derivative = last_error - error;
+        error_derivative = t * (last_error - error);
         last_error = error;
-        error_integral += error;
+        error_integral += error * t;
         double adjustment = error * P_value - error_derivative * D_value + error_integral * I_value;
         out.left =  normalized_error * speed * ( dist + 1 ) - adjustment;
         // catches outliers
@@ -55,6 +57,6 @@ namespace controller{
     }
 
     Pid_controller::Pid_controller(const Pid_parameters &parameters): parameters(parameters) {
-
+        timer.reset();
     }
 }
