@@ -47,7 +47,7 @@ namespace controller{
         if (out.right > 1){
             out.right = 1;
         }
-        //cout << out.left << " " << out.right << " " << theta << " " << destination_theta << " " << dist << endl;
+        cout << out.left << " " << out.right << " " << theta << " " << destination_theta << " " << dist << endl;
         return out;
     }
 
