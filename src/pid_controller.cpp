@@ -33,19 +33,13 @@ namespace controller{
         error_integral += error * t;
         double adjustment = error * P_value - error_derivative * D_value + error_integral * I_value;
         out.left =  normalized_error * speed * ( dist + 1 ) - adjustment;
-        // catches outliers
-        if (out.left < -1) {
-            out.left = -1;
-        }
-        if (out.left > 1){
-            out.left = 1;
-        }
         out.right = normalized_error * speed * ( dist + 1 ) + adjustment;
-        if (out.right < -1) {
-            out.right = -1;
-        }
-        if (out.right > 1){
-            out.right = 1;
+        // catches outliers
+        float max = abs(out.left);
+        if (abs(out.right)>max) max = abs(out.right);
+        if (max > 1){
+            out.right = out.right / max;
+            out.left = out.left / max;
         }
         cout << out.left << " " << out.right << " " << theta << " " << destination_theta << " " << dist << endl;
         return out;
