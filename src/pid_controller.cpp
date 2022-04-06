@@ -3,6 +3,8 @@
 using namespace cell_world;
 using namespace std;
 
+#define RATIO .5
+
 namespace controller{
 
     Pid_outputs Pid_controller::process(const Pid_inputs &inputs, Behavior behavior) {
@@ -40,6 +42,10 @@ namespace controller{
         if (max > 1){
             out.right = out.right / max;
             out.left = out.left / max;
+        }
+        if ((out.right < 0 && out.left > 0) || (out.right > 0 && out.left <0 )) {
+            out.right *= RATIO;
+            out.left *= RATIO;
         }
         cout << out.left << " " << out.right << " " << theta << " " << destination_theta << " " << dist << endl;
         return out;
