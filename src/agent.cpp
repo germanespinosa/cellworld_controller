@@ -12,4 +12,11 @@ namespace controller {
         }
         return abs(max_backward - min_backward) * v + min_backward;
     }
+
+    bool Agent::stop() {
+        set_right(0);
+        set_left(0);
+        update();
+        return true;
+    }
 }
