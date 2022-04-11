@@ -1,7 +1,7 @@
 #include <controller/controller_service.h>
 #include <filesystem>
 #include <iostream>
-
+#include <mutex>
 
 using namespace cell_world;
 using namespace tcp_messages;
@@ -9,8 +9,8 @@ using namespace std;
 using namespace json_cpp;
 
 namespace controller {
-
-   string logs_path = "";
+    mutex robot_mtx;
+    string logs_path = "";
 
     bool Controller_service::set_destination(const cell_world::Location &location) {
         return ((Controller_server *) _server)->set_destination(location);
@@ -80,31 +80,34 @@ namespace controller {
         state = Controller_state::Playing;
         Pid_inputs pi;
         while(state != Controller_state::Stopped){
+            robot_mtx.lock();
+            if (this->tracking_client.capture.cool_down.time_out()){
             // if there is no information from the tracker
-            if (!tracking_client.agent.is_valid() ||
-                state == Controller_state::Paused ||
-                destination_timer.time_out()){
-                agent.set_left(0);
-                agent.set_right(0);
-                agent.update();
-            } else {
-                //PID controller
-                pi.location = tracking_client.agent.step.location;
-                pi.rotation = tracking_client.agent.step.rotation;
-                pi.destination = get_next_stop();
-                auto dist = destination.dist(pi.location);
-                if (dist < world.cell_transformation.size / 2)
-                {
+                if (!tracking_client.agent.is_valid() ||
+                    state == Controller_state::Paused ||
+                    destination_timer.time_out()){
                     agent.set_left(0);
                     agent.set_right(0);
                     agent.update();
                 } else {
-                    auto robot_command = pid_controller.process(pi, behavior);
-                    agent.set_left(robot_command.left);
-                    agent.set_right(robot_command.right);
-                    agent.update();
+                    //PID controller
+                    pi.location = tracking_client.agent.step.location;
+                    pi.rotation = tracking_client.agent.step.rotation;
+                    pi.destination = get_next_stop();
+                    auto dist = destination.dist(pi.location);
+                    if (dist < world.cell_transformation.size / 2) {
+                        agent.set_left(0);
+                        agent.set_right(0);
+                        agent.update();
+                    } else {
+                        auto robot_command = pid_controller.process(pi, behavior);
+                        agent.set_left(robot_command.left);
+                        agent.set_right(robot_command.right);
+                        agent.update();
+                    }
                 }
             }
+            robot_mtx.unlock();
             //prevents overflowing the robot ( max 10 commands per second)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
@@ -207,10 +210,11 @@ namespace controller {
             agent.step = step;
             agent.timer = Timer(.5);
         } else if (step.agent_name == adversary.agent_name) {
-            adversary.step = step;
+            adQversary.step = step;
             adversary.timer = Timer(.5);
             if (contains_agent_state(agent.agent_name)) {
                 auto predator = get_current_state(agent.agent_name);
+                robot_mtx.lock();
                 auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
                 if (is_captured) {
                     controller_server->agent.set_left(0);
@@ -220,6 +224,7 @@ namespace controller {
                     controller_server->agent.update();
                     controller_server->send_capture(step.frame);
                 }
+                robot_mtx.unlock();
                 if (visibility.is_visible(predator.location, step.location) &&
                         to_degrees(angle_difference(predator.location.atan(step.location), to_radians(predator.rotation))) < view_angle / 2) {
                     if (peeking.is_seen(predator.location, step.location)) {
