@@ -210,7 +210,7 @@ namespace controller {
             agent.step = step;
             agent.timer = Timer(.5);
         } else if (step.agent_name == adversary.agent_name) {
-            adQversary.step = step;
+            adversary.step = step;
             adversary.timer = Timer(.5);
             if (contains_agent_state(agent.agent_name)) {
                 auto predator = get_current_state(agent.agent_name);
