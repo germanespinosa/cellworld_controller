@@ -215,15 +215,15 @@ namespace controller {
             if (contains_agent_state(agent.agent_name)) {
                 auto predator = get_current_state(agent.agent_name);
                 robot_mtx.lock();
-                auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
-                if (is_captured) {
-                    controller_server->agent.set_left(0);
-                    controller_server->agent.set_right(0);
-                    controller_server->agent.capture();
-                    controller_server->agent.update();
-                    controller_server->agent.update();
-                    controller_server->send_capture(step.frame);
-                }
+                    auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
+                    if (is_captured) {
+                        controller_server->agent.set_left(0);
+                        controller_server->agent.set_right(0);
+                        controller_server->agent.capture();
+                        controller_server->agent.update();
+                        controller_server->agent.update();
+                        controller_server->send_capture(step.frame);
+                    }
                 robot_mtx.unlock();
                 if (visibility.is_visible(predator.location, step.location) &&
                         to_degrees(angle_difference(predator.location.atan(step.location), to_radians(predator.rotation))) < view_angle / 2) {
