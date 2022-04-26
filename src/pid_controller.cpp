@@ -3,7 +3,7 @@
 using namespace cell_world;
 using namespace std;
 
-#define RATIO .5
+#define RATIO 1.0
 
 namespace controller{
 
