@@ -122,7 +122,7 @@ namespace controller {
     }
 
 #define goal_weight 0
-#define occlusion_weight .001  // was 0.0001
+#define occlusion_weight .0005  // was 0.0001
 #define decay 2
 
     cell_world::Location Controller_server::get_next_stop() {
