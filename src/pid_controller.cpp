@@ -35,6 +35,14 @@ namespace controller{
         error_derivative = t * (last_error - error);
         last_error = error;
         error_integral += error * t;
+
+        // eliminate integral windup
+        if (error_integral > 100) {
+            error_integral = 100;
+        } elif (error_integral < -100){
+            error_integral = -100;
+        }
+
         double adjustment = error * P_value - error_derivative * D_value + error_integral * I_value;
         cout << "INT E "<< error_integral << endl;
         out.left =  normalized_error * speed * ( dist + 1 ) - adjustment;
