@@ -36,6 +36,7 @@ namespace controller{
         last_error = error;
         error_integral += error * t;
         double adjustment = error * P_value - error_derivative * D_value + error_integral * I_value;
+        cout << "INT E "<< error_integral << endl;
         out.left =  normalized_error * speed * ( dist + 1 ) - adjustment;
         out.right = normalized_error * speed * ( dist + 1 ) + adjustment;
         // catches outliers
