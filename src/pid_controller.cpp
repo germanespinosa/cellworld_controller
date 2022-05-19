@@ -36,11 +36,11 @@ namespace controller{
         last_error = error;
         error_integral += error * t;
 
-        // eliminate integral windup
-        if (error_integral > 100) {
-            error_integral = 100;
-        } else if (error_integral < -100){
-            error_integral = -100;
+        // eliminate integral windup (100)
+        if (error_integral > 50) {
+            error_integral = 50;
+        } else if (error_integral < -50){
+            error_integral = -50;
         }
 
         double adjustment = error * P_value - error_derivative * D_value + error_integral * I_value;
