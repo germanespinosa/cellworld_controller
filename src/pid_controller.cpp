@@ -39,7 +39,7 @@ namespace controller{
         // eliminate integral windup
         if (error_integral > 100) {
             error_integral = 100;
-        } elif (error_integral < -100){
+        } else if (error_integral < -100){
             error_integral = -100;
         }
 
