@@ -121,9 +121,9 @@ namespace controller {
         return true;
     }
 
-#define goal_weight 0
+#define goal_weight 0.1
 #define occlusion_weight 0.001 // was 0.0001
-#define decay 2
+#define decay 4
 
     cell_world::Location Controller_server::get_next_stop() {
         auto agent_location = tracking_client.agent.step.location;
