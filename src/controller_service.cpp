@@ -121,7 +121,7 @@ namespace controller {
         return true;
     }
 
-#define goal_weight 0.8
+#define goal_weight 0.1
 #define occlusion_weight 0.25 //was 0.0001
 #define decay 6
 
