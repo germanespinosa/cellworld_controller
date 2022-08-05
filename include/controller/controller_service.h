@@ -96,6 +96,7 @@ namespace controller {
 
         void controller_process();
         cell_world::Location get_next_stop();
+        cell_world::Coordinates get_next_coordinate();
 
         template< typename T, typename... Ts>
         T &create_local_client(Ts... vs){
@@ -139,6 +140,7 @@ namespace controller {
         cell_world::Cell_group cells;
         cell_world::Paths paths;
         cell_world::Map map;
+        Robot_Mode mode = Initialize;
 
 
         cell_world::Location_visibility navigability;

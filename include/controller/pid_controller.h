@@ -3,19 +3,24 @@
 #include <cell_world.h>
 
 namespace controller {
-
+    enum Robot_Mode{
+        Move,
+        Initialize
+    };
     enum Behavior{
         Explore,
         Pursue
     };
 
-    struct Pid_outputs : json_cpp::Json_object{
+    struct Controller_outputs : json_cpp::Json_object{
         Json_object_members(
                 Add_member(left);
                 Add_member(right);
+                Add_member(speed);
         )
         double left;
         double right;
+        double speed;
     };
 
     struct Pid_inputs : json_cpp::Json_object{
@@ -28,6 +33,22 @@ namespace controller {
         double rotation;
         cell_world::Location destination;
     };
+
+    struct Controller_inputs : json_cpp::Json_object{
+        Json_object_members(
+                Add_member(location);
+                Add_member(next_coordinate);
+                Add_member(current_coordinate); // from tracker when initializing - then store when dont want involved anymore
+                Add_member(previous_coordinate);
+                );
+        cell_world::Location location;
+        cell_world::Coordinates next_coordinate;
+        cell_world::Coordinates current_coordinate;
+        cell_world::Coordinates previous_coordinate;
+
+    };
+
+
 
     // values located in robot_library/config/pid.json
     struct Pid_parameters : json_cpp::Json_object{
@@ -62,16 +83,17 @@ namespace controller {
                 Add_member(out);
                 Add_member(in);
                 );
-        Pid_outputs process(const Pid_inputs &, Behavior);
+        Controller_outputs process(const Controller_inputs &, Behavior);
         static double normalize_error(double);
+        cell_world::Coordinates delta_coordinates(const cell_world::Coordinates &c1, const  cell_world::Coordinates &c2);
         Pid_parameters parameters;
         double error{};
         double error_integral{};
         double error_derivative{};
         double normalized_error{};
         double last_error{};
-        Pid_outputs out;
-        Pid_inputs in;
+        Controller_outputs out;
+        Controller_inputs in;
         cell_world::Timer timer;
     };
 }

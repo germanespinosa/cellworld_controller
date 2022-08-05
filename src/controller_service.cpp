@@ -78,7 +78,7 @@ namespace controller {
 
     void Controller_server::controller_process() {                      // setting robot velocity
         state = Controller_state::Playing;
-        Pid_inputs pi;
+        Controller_inputs ci;
         while(state != Controller_state::Stopped){
             robot_mtx.lock();
             if (this->tracking_client.capture.cool_down.time_out()){
@@ -90,25 +90,37 @@ namespace controller {
                     agent.set_right(0);
                     agent.update();
                 } else {
-                    //PID controller
-                    pi.location = tracking_client.agent.step.location;
-                    pi.rotation = tracking_client.agent.step.rotation;
-                    pi.destination = get_next_stop();
-                    cout << "DESTINATION: " << pi.destination << endl;
-                    auto dist = destination.dist(pi.location);
+                    // Tick translator
+                    ci.location = tracking_client.agent.step.location;
+                    ci.current_coordinate = cells[cells.find(ci.location)].coordinates; // TODO: for now base current coordinate off of tracker in future will store and only use tracker for initialization
+                    ci.next_coordinate = get_next_coordinate();
+                    cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
+                    cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
+
+                    if (mode == Initialize){
+                        // TODO: will look at rotation and compute prev coordinate based on that maybe
+                        ci.previous_coordinate = Coordinates(-2,0);
+                        cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
+                    }
+
+
+                    // catch when destination reached
+                    auto dist = destination.dist(ci.location);
                     if (dist < world.cell_transformation.size / 2) {
                         agent.set_left(0);
                         agent.set_right(0);
                         agent.update();
+
                     } else {
-                        auto robot_command = pid_controller.process(pi, behavior);
-                        //agent.set_speed();// TODO: make this constant
+                        auto robot_command = pid_controller.process(ci, behavior);
                         // TODO: make this based on step
-//                        agent.set_left(1000);
-//                        agent.set_right(1000);
-                        agent.set_left(0);
-                        agent.set_right(0);
+                        cout << "LEFT TICKS: " << robot_command.left << " RIGHT TICKS: " << robot_command.right << " SPEED " << robot_command.speed << endl;
+                        agent.set_speed(robot_command.speed);
+                        agent.set_left(robot_command.left);
+                        agent.set_right(robot_command.right);
                         agent.update();
+                        // TODO: set previous coordinate to current coordinate
+                        // TODO: change mode to move instead of initialize
                     }
                 }
             }
@@ -133,10 +145,23 @@ namespace controller {
         auto agent_cell_index = cells.find(agent_location);
         auto move = paths.get_move(cells[agent_cell_index], cells[destination_cell_index]);  // returns next move
         auto next_stop = cells.find(map[cells[agent_cell_index].coordinates + move]);
-        cout << "MOVE: " << move << endl;
-        cout << "AGENT LOCATION: " << agent_location << endl;
         return cells[next_stop].location;
     }
+
+    cell_world::Coordinates Controller_server::get_next_coordinate() {
+        auto agent_location = tracking_client.agent.step.location;  // this uses the tracker to find the location TODO: we do not want to use the tracker
+        auto destination_cell_index = cells.find(destination);
+        auto agent_cell_index = cells.find(agent_location);
+        auto move = paths.get_move(cells[agent_cell_index], cells[destination_cell_index]);  // returns next move
+        auto next_stop = cells.find(map[cells[agent_cell_index].coordinates + move]);
+
+        // send next move instead of next location
+        return cells[next_stop].coordinates;
+    }
+
+
+
+
 
     bool Controller_server::pause() {
         if (state == Controller_state::Playing) {
