@@ -94,6 +94,7 @@ namespace controller {
                     pi.location = tracking_client.agent.step.location;
                     pi.rotation = tracking_client.agent.step.rotation;
                     pi.destination = get_next_stop();
+                    cout << "DESTINATION: " << pi.destination << endl;
                     auto dist = destination.dist(pi.location);
                     if (dist < world.cell_transformation.size / 2) {
                         agent.set_left(0);
@@ -101,8 +102,12 @@ namespace controller {
                         agent.update();
                     } else {
                         auto robot_command = pid_controller.process(pi, behavior);
-                        agent.set_left(robot_command.left);
-                        agent.set_right(robot_command.right);
+                        //agent.set_speed();// TODO: make this constant
+                        // TODO: make this based on step
+//                        agent.set_left(1000);
+//                        agent.set_right(1000);
+                        agent.set_left(0);
+                        agent.set_right(0);
                         agent.update();
                     }
                 }
@@ -121,39 +126,16 @@ namespace controller {
         return true;
     }
 
-#define goal_weight 0
-#define occlusion_weight 0.0001 //was 0.0001
-#define decay 2
-
+    // finds next coordinate based from astar file
     cell_world::Location Controller_server::get_next_stop() {
         auto agent_location = tracking_client.agent.step.location;
-        if (navigability.is_visible(agent_location, destination)) {
-            return destination;
-        }
         auto destination_cell_index = cells.find(destination);
-        auto next_stop_test = cells.find(agent_location);
-        auto next_stop = next_stop_test;
-        while (navigability.is_visible(agent_location, cells[next_stop_test].location)){
-            next_stop = next_stop_test;
-            auto move = paths.get_move(cells[next_stop], cells[destination_cell_index]);
-            if (move == Move{0,0}) break;
-            next_stop_test = cells.find(map[cells[next_stop].coordinates + move]);
-        }
-
-        auto total_gravity_change = Location(0,0);
-        for (auto &cell_r : cells.occluded_cells()) {
-            Cell cell = cell_r.get();
-            auto distance = cell.location.dist(agent_location);
-            auto theta = cell.location.atan(agent_location);
-            auto gravity = occlusion_weight / pow(distance,decay);
-            total_gravity_change = total_gravity_change.move(theta, gravity);
-        }
-        auto distance = cells[next_stop].location.dist(agent_location);
-        auto theta = agent_location.atan(cells[next_stop].location);
-        auto gravity = goal_weight / pow(distance,decay);
-        total_gravity_change = total_gravity_change.move(theta, gravity);
-
-        return cells[next_stop].location + total_gravity_change;
+        auto agent_cell_index = cells.find(agent_location);
+        auto move = paths.get_move(cells[agent_cell_index], cells[destination_cell_index]);  // returns next move
+        auto next_stop = cells.find(map[cells[agent_cell_index].coordinates + move]);
+        cout << "MOVE: " << move << endl;
+        cout << "AGENT LOCATION: " << agent_location << endl;
+        return cells[next_stop].location;
     }
 
     bool Controller_server::pause() {
