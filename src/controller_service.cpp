@@ -79,7 +79,6 @@ namespace controller {
     void Controller_server::controller_process() {                      // setting robot velocity
         state = Controller_state::Playing;
         Pid_inputs pi;
-
         while(state != Controller_state::Stopped){
             robot_mtx.lock();
             if (this->tracking_client.capture.cool_down.time_out()){
@@ -87,7 +86,8 @@ namespace controller {
                 if (!tracking_client.agent.is_valid() ||
                     state == Controller_state::Paused ||
                     destination_timer.time_out()){
-                    agent.stop();
+                    agent.set_left(0);
+                    agent.set_right(0);
                     agent.update();
                 } else {
                     //PID controller
@@ -101,9 +101,8 @@ namespace controller {
                         agent.update();
                     } else {
                         auto robot_command = pid_controller.process(pi, behavior);
-                        agent.set_left(robot_command.left);  // send tick number based on move selected
+                        agent.set_left(robot_command.left);
                         agent.set_right(robot_command.right);
-//                        agent.set_speed(robot_command.speed);
                         agent.update();
                     }
                 }
@@ -122,15 +121,39 @@ namespace controller {
         return true;
     }
 
+#define goal_weight 0
+#define occlusion_weight 0.0001 //was 0.0001
+#define decay 2
 
     cell_world::Location Controller_server::get_next_stop() {
         auto agent_location = tracking_client.agent.step.location;
-        auto destination_cell_index = cells.find(destination);  // returns cell id of destination
-        auto current_cell_index = cells.find(agent_location);
-        auto move = paths.get_move(cells[current_cell_index], cells[destination_cell_index]);
-        auto next_stop = cells.find(map[cells[current_cell_index].coordinates + move]);
-        // TODO:convert next stop into 1 of the 6 moves
-        return cells[next_stop].location;
+        if (navigability.is_visible(agent_location, destination)) {
+            return destination;
+        }
+        auto destination_cell_index = cells.find(destination);
+        auto next_stop_test = cells.find(agent_location);
+        auto next_stop = next_stop_test;
+        while (navigability.is_visible(agent_location, cells[next_stop_test].location)){
+            next_stop = next_stop_test;
+            auto move = paths.get_move(cells[next_stop], cells[destination_cell_index]);
+            if (move == Move{0,0}) break;
+            next_stop_test = cells.find(map[cells[next_stop].coordinates + move]);
+        }
+
+        auto total_gravity_change = Location(0,0);
+        for (auto &cell_r : cells.occluded_cells()) {
+            Cell cell = cell_r.get();
+            auto distance = cell.location.dist(agent_location);
+            auto theta = cell.location.atan(agent_location);
+            auto gravity = occlusion_weight / pow(distance,decay);
+            total_gravity_change = total_gravity_change.move(theta, gravity);
+        }
+        auto distance = cells[next_stop].location.dist(agent_location);
+        auto theta = agent_location.atan(cells[next_stop].location);
+        auto gravity = goal_weight / pow(distance,decay);
+        total_gravity_change = total_gravity_change.move(theta, gravity);
+
+        return cells[next_stop].location + total_gravity_change;
     }
 
     bool Controller_server::pause() {

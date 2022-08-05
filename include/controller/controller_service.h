@@ -1,11 +1,11 @@
 #pragma once
 #include <tcp_messages.h>
 #include <cell_world.h>
+#include <controller/pid_controller.h>
 #include <controller/agent.h>
 #include <agent_tracking/tracking_client.h>
 #include <experiment/experiment_client.h>
 #include <controller/controller_client.h>
-#include <controller/tick_controller.h>
 
 namespace controller {
 
