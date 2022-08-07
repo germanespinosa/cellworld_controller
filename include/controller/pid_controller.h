@@ -23,6 +23,7 @@ namespace controller {
         double speed;
     };
 
+
     struct Pid_inputs : json_cpp::Json_object{
         Json_object_members(
                 Add_member(location);
@@ -86,6 +87,7 @@ namespace controller {
         Controller_outputs process(const Controller_inputs &, Behavior);
         static double normalize_error(double);
         cell_world::Coordinates delta_coordinates(const cell_world::Coordinates &c1, const  cell_world::Coordinates &c2);
+        int get_side(const cell_world::Coordinates &delta_side);
         Pid_parameters parameters;
         double error{};
         double error_integral{};

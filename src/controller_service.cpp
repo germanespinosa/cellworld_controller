@@ -79,6 +79,7 @@ namespace controller {
     void Controller_server::controller_process() {                      // setting robot velocity
         state = Controller_state::Playing;
         Controller_inputs ci;
+        // TODO: if move done current = next, prev = current, next = move
         while(state != Controller_state::Stopped){
             robot_mtx.lock();
             if (this->tracking_client.capture.cool_down.time_out()){
@@ -90,6 +91,7 @@ namespace controller {
                     agent.set_right(0);
                     agent.update();
                 } else {
+                    // TODO: get next coordinate logic here
                     // Tick translator
                     ci.location = tracking_client.agent.step.location;
                     ci.current_coordinate = cells[cells.find(ci.location)].coordinates; // TODO: for now base current coordinate off of tracker in future will store and only use tracker for initialization
@@ -138,7 +140,7 @@ namespace controller {
         return true;
     }
 
-    // finds next coordinate based from astar file
+    // finds next location based from astar file
     cell_world::Location Controller_server::get_next_stop() {
         auto agent_location = tracking_client.agent.step.location;
         auto destination_cell_index = cells.find(destination);
@@ -147,7 +149,7 @@ namespace controller {
         auto next_stop = cells.find(map[cells[agent_cell_index].coordinates + move]);
         return cells[next_stop].location;
     }
-
+    // finds next coordinate
     cell_world::Coordinates Controller_server::get_next_coordinate() {
         auto agent_location = tracking_client.agent.step.location;  // this uses the tracker to find the location TODO: we do not want to use the tracker
         auto destination_cell_index = cells.find(destination);
@@ -155,7 +157,7 @@ namespace controller {
         auto move = paths.get_move(cells[agent_cell_index], cells[destination_cell_index]);  // returns next move
         auto next_stop = cells.find(map[cells[agent_cell_index].coordinates + move]);
 
-        // send next move instead of next location
+        // send next coordinate instead of next location
         return cells[next_stop].coordinates;
     }
 
