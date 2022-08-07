@@ -14,6 +14,11 @@ namespace controller {
         Playing,
         Paused
     };
+    enum Robot_Mode{
+        Initialize,
+        Moving,
+        Ready,
+    };
 
     struct Controller_service : tcp_messages::Message_service {
         Routes (
@@ -95,7 +100,7 @@ namespace controller {
 
 
         void controller_process();
-        cell_world::Coordinates get_next_coordinate();
+        cell_world::Coordinates get_next_coordinate(const cell_world::Coordinates &current_coordinate);
 
         template< typename T, typename... Ts>
         T &create_local_client(Ts... vs){

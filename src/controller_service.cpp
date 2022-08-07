@@ -92,26 +92,30 @@ namespace controller {
                     agent.set_speed(0);
                     agent.update();
                 } else {
-                    // first robot move
-                    // TODO: get next coordinate logic here
-                    // Tick translator
-                    ci.location = tracking_client.agent.step.location;
-                    ci.current_coordinate = cells[cells.find(ci.location)].coordinates; // TODO: for now base current coordinate off of tracker in future will store and only use tracker for initialization
-                    ci.next_coordinate = get_next_coordinate();
-                    cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
-                    cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
-                    if (agent.is_move_done()){
-                        cout << "YESSSSSSSSSSSSSSSSS POJLK:J:LKJK:LKJ:LKJML:" << endl;
-                    }
-
+                    // TODO: fix this to work for any spawn location and orientation
+                    // Probably PID
                     if (mode == Initialize){
                         cout << "INITIALIZE ROBOT" << endl;
-                        // TODO: will look at rotation and compute prev coordinate based on that maybe**
-                        ci.previous_coordinate = Coordinates(-2,0);
-                        ci.current_coordinate = cells[cells.find(ci.location)].coordinates;
-                        cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
+//                        ci.previous_coordinate = Coordinates(-2,0);  // // TODO: will look at rotation and compute prev coordinate based on that maybe**
+                        ci.location = tracking_client.agent.step.location;
+                        ci.current_coordinate = Coordinates(-2,0);
+                        ci.next_coordinate = cells[cells.find(ci.location)].coordinates;  // based on location
+                        agent.set_speed(ROBOT_SPEED);
+                        agent.set_left(216);
+                        agent.set_right(216);
+                        agent.update();
+                        mode = Moving; //TODO: make sure this changes
                     }
-
+                    cout << "mode " << mode << endl;
+                    if (agent.is_move_done()){
+                        ci.location = tracking_client.agent.step.location;
+                        ci.previous_coordinate = ci.current_coordinate;
+                        ci.current_coordinate = ci.next_coordinate;
+                        ci.next_coordinate = get_next_coordinate(ci.current_coordinate);
+                        cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
+                        cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
+                        mode = Ready;
+                    }
 
                     // catch when destination reached
                     if (ci.current_coordinate == ci.next_coordinate) {
@@ -120,7 +124,7 @@ namespace controller {
                         agent.set_speed(0);
                         agent.update();
 
-                    } else {
+                    } else if (mode == Ready) {
                         auto robot_command = pid_controller.process(ci, behavior);
                         // TODO: make this based on step
                         cout << "LEFT TICKS: " << robot_command.left << " RIGHT TICKS: " << robot_command.right << " SPEED " << robot_command.speed << endl;
@@ -128,6 +132,7 @@ namespace controller {
                         agent.set_left(robot_command.left);
                         agent.set_right(robot_command.right);
                         agent.update();
+                        mode = Moving;
                         // TODO: set previous coordinate to current coordinate
                         // TODO: change mode to move instead of initialize
                     }
@@ -148,11 +153,12 @@ namespace controller {
     }
 
     // finds next coordinate
-    cell_world::Coordinates Controller_server::get_next_coordinate() {
+    cell_world::Coordinates Controller_server::get_next_coordinate(const cell_world::Coordinates &current_coordinate) {
 
         auto agent_location = tracking_client.agent.step.location;  // this uses the tracker to find the location TODO: we do not want to use the tracker
         auto destination_cell_index = cells.find(destination);
-        auto agent_cell_index = cells.find(agent_location);
+        //auto agent_cell_index = cells.find(agent_location);
+        auto agent_cell_index = cells.find(current_coordinate);
         auto move = paths.get_move(cells[agent_cell_index], cells[destination_cell_index]);  // returns next move
         auto next_stop = cells.find(map[cells[agent_cell_index].coordinates + move]);
 
