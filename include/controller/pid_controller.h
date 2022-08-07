@@ -1,6 +1,7 @@
 #pragma once
 #include <json_cpp.h>
 #include <cell_world.h>
+#include <vector>
 
 namespace controller {
     enum Robot_Mode{
@@ -11,6 +12,7 @@ namespace controller {
         Explore,
         Pursue
     };
+
 
     struct Controller_outputs : json_cpp::Json_object{
         Json_object_members(
@@ -88,6 +90,7 @@ namespace controller {
         static double normalize_error(double);
         cell_world::Coordinates delta_coordinates(const cell_world::Coordinates &c1, const  cell_world::Coordinates &c2);
         int get_side(const cell_world::Coordinates &delta_side);
+        std::pair<int,int> get_ticks(const cell_world::Coordinates &delta_move, int side);
         Pid_parameters parameters;
         double error{};
         double error_integral{};
