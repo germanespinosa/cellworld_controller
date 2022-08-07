@@ -10,5 +10,6 @@ namespace controller {
         virtual void capture() = 0;
         virtual bool update() = 0;
         virtual bool stop();
+        virtual bool is_move_done() = 0;
     };
 }

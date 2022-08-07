@@ -15,17 +15,16 @@ namespace controller{
         in = inputs;
         auto delta_side = delta_coordinates(in.previous_coordinate, in.current_coordinate);
         auto delta_move = delta_coordinates(in.current_coordinate, in.next_coordinate);
-        cout << "delta step: " << delta_side << endl;
-        cout << "delta move: " << delta_move << endl;
+
         // STEP 1: find what side of the hexagon the robot entered (basically its rotation)
         int side = get_side(delta_side);
         // STEP 2: decide move based on side and next coordinate
         std::pair<int,int> tick = get_ticks(delta_move, side);
-        cout << "LEFT TCISK: " << tick.first << endl;
 
-        out.left = 100;
-        out.right = 100;
-        out.speed = 100; // TODO: put this in header
+
+        out.left = tick.first;
+        out.right = tick.second;
+        out.speed = ROBOT_SPEED;
         return out;
     }
 

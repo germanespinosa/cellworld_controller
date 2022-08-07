@@ -3,6 +3,8 @@
 #include <cell_world.h>
 #include <vector>
 
+#define ROBOT_SPEED 100
+
 namespace controller {
     enum Robot_Mode{
         Move,

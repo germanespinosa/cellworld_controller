@@ -95,7 +95,6 @@ namespace controller {
 
 
         void controller_process();
-        cell_world::Location get_next_stop();
         cell_world::Coordinates get_next_coordinate();
 
         template< typename T, typename... Ts>
