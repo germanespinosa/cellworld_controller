@@ -51,7 +51,8 @@ namespace controller{
             if (delta_side == c) return side_count;
             side_count ++;
         }
-        cout << " PROBLEM NO SIDE MATCH" <<endl;
+        cout << "PROBLEM NO SIDE MATCH" <<endl;
+        cout << "DELTA SIDE " << delta_side <<endl;
         return 1000; // this should never occur so will indicate an error
     }
     std::pair<int,int> Pid_controller::get_ticks(const cell_world::Coordinates &delta_move, int side){

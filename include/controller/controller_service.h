@@ -18,6 +18,7 @@ namespace controller {
         Initialize,
         Moving,
         Ready,
+        Waiting
     };
 
     struct Controller_service : tcp_messages::Message_service {
@@ -145,6 +146,9 @@ namespace controller {
         cell_world::Paths paths;
         cell_world::Map map;
         Robot_Mode mode = Initialize;
+
+        // TODO: imporve this
+        cell_world::Coordinates save_prev_coordinate;
 
 
         cell_world::Location_visibility navigability;

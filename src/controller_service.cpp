@@ -101,19 +101,19 @@ namespace controller {
                         ci.current_coordinate = Coordinates(-2,0);
                         ci.next_coordinate = cells[cells.find(ci.location)].coordinates;  // based on location
                         agent.set_speed(ROBOT_SPEED);
-                        agent.set_left(216);
-                        agent.set_right(216);
+                        agent.set_left(-216);
+                        agent.set_right(-216);
                         agent.update();
                         mode = Moving; //TODO: make sure this changes
                     }
-                    cout << "mode " << mode << endl;
-                    if (agent.is_move_done()){
+                    if (agent.is_move_done() || mode == Waiting){
                         ci.location = tracking_client.agent.step.location;
-                        ci.previous_coordinate = ci.current_coordinate;
+                        if (mode!= Waiting){
+                            //save_prev_coordinate = ci.previous_coordinate;
+                            ci.previous_coordinate = ci.current_coordinate;
+                        }
                         ci.current_coordinate = ci.next_coordinate;
                         ci.next_coordinate = get_next_coordinate(ci.current_coordinate);
-                        cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
-                        cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
                         mode = Ready;
                     }
 
@@ -123,11 +123,14 @@ namespace controller {
                         agent.set_right(0);
                         agent.set_speed(0);
                         agent.update();
+                        mode = Waiting;
+                        cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
+                        cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
+                        cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
+                        //ci.previous_coordinate = save_prev_coordinate;
 
                     } else if (mode == Ready) {
                         auto robot_command = pid_controller.process(ci, behavior);
-                        // TODO: make this based on step
-                        cout << "LEFT TICKS: " << robot_command.left << " RIGHT TICKS: " << robot_command.right << " SPEED " << robot_command.speed << endl;
                         agent.set_speed(robot_command.speed);
                         agent.set_left(robot_command.left);
                         agent.set_right(robot_command.right);
