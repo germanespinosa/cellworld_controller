@@ -96,7 +96,6 @@ namespace controller {
                     // Probably PID
                     if (mode == Initialize){
                         cout << "INITIALIZE ROBOT" << endl;
-//                        ci.previous_coordinate = Coordinates(-2,0);  // // TODO: will look at rotation and compute prev coordinate based on that maybe**
                         ci.location = tracking_client.agent.step.location;
                         ci.current_coordinate = Coordinates(-2,0);
                         ci.next_coordinate = cells[cells.find(ci.location)].coordinates;  // based on location
@@ -127,8 +126,6 @@ namespace controller {
                         cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
                         cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
                         cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
-                        //ci.previous_coordinate = save_prev_coordinate;
-
                     } else if (mode == Ready) {
                         auto robot_command = pid_controller.process(ci, behavior);
                         agent.set_speed(robot_command.speed);
