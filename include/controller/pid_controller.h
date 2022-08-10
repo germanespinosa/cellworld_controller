@@ -24,16 +24,16 @@ namespace controller {
     };
 
 
-    struct Pid_inputs : json_cpp::Json_object{
-        Json_object_members(
-                Add_member(location);
-                Add_member(rotation);
-                Add_member(destination);
-        );
-        cell_world::Location location;
-        double rotation;
-        cell_world::Location destination;
-    };
+//    struct Pid_inputs : json_cpp::Json_object{
+//        Json_object_members(
+//                Add_member(location);
+//                Add_member(rotation);
+//                Add_member(destination);
+//        );
+//        cell_world::Location location;
+//        double rotation;
+//        cell_world::Location destination;
+//    };
 
     struct Controller_inputs : json_cpp::Json_object{
         Json_object_members(
@@ -50,7 +50,7 @@ namespace controller {
     };
 
 
-
+//
     // values located in robot_library/config/pid.json
     struct Pid_parameters : json_cpp::Json_object{
         Json_object_members(
