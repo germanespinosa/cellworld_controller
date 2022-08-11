@@ -52,4 +52,13 @@ namespace controller {
         }
     }
 
+    int Controller_client::set_agent_values(const Agent_values &values) {
+        if (local_server)
+        {
+            return local_server->set_agent_values(values);
+        } else{
+            return send_request(Message("set_agent_values", values)).get_body<bool>();
+        }
+    }
+
 }

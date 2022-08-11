@@ -21,18 +21,30 @@ namespace controller {
         Waiting
     };
 
+//    struct Agent_values : json_cpp::Json_object {
+//        Json_object_members(
+//                Add_member(left);
+//                Add_member(right);
+//                Add_member(speed);
+//                )
+//        int left, right, speed;
+//    };
+
     struct Controller_service : tcp_messages::Message_service {
+
         Routes (
             Add_route_with_response("set_destination", set_destination, cell_world::Location);
             Add_route_with_response("stop", stop_controller);
             Add_route_with_response("pause", pause_controller);
             Add_route_with_response("resume", resume_controller);
             Add_route_with_response("set_behavior", set_behavior, int);
+            Add_route_with_response("set_agent_values", set_agent_values, Agent_values);
             Allow_subscription();
         );
 
         bool set_destination(const cell_world::Location &);
         bool stop_controller();
+        int set_agent_values(const Agent_values &);
         bool pause_controller();
         bool resume_controller();
         bool set_behavior(int);
@@ -59,6 +71,7 @@ namespace controller {
         void send_step(const cell_world::Step &);
         void send_capture(int);
         bool set_destination(const cell_world::Location &);
+        int set_agent_values(const Agent_values &);
         bool pause();
         bool resume();
         void set_occlusions(const std::string &occlusions, float margin = .45);

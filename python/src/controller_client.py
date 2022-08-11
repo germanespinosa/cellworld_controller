@@ -36,3 +36,5 @@ class ControllerClient(MessageClient):
     def set_behavior(self, behavior: int) -> bool:
         return self.send_request(Message("set_behavior", behavior)).get_body(bool)
 
+    def set_agent_values(self, left: int):
+        return self.send_request(Message("set_agent_values", left)).get_body(bool)

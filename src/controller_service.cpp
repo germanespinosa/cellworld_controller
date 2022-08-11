@@ -51,6 +51,14 @@ namespace controller {
         }
     }
 
+    // this should be an int right
+    int Controller_service::set_agent_values(const Agent_values &values) {
+        ((Controller_server *) _server)->agent.set_left(values.left);
+        ((Controller_server *) _server)->agent.set_right(values.right);
+        ((Controller_server *) _server)->agent.set_speed(values.speed);
+        return ((Controller_server *) _server)->agent.update();
+    }
+
 
 
     Controller_server::Controller_server(const string &pid_config_file_path,
@@ -187,7 +195,7 @@ namespace controller {
     }
 
     void Controller_server::set_occlusions(const std::string &occlusions, float margin) {
-        auto occlusions_cgb = Resources::from("cell_group").key("hexagonal").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
+        auto occlusions_cgb = Resources::from("cell_group").key("hexagonal").key("00_00").key("occlusions").get_resource<Cell_group_builder>();
         world.set_occlusions(occlusions_cgb);
         cells = world.create_cell_group();
         paths = Paths(world.create_paths(Resources::from("paths").key("hexagonal").key(occlusions).key("astar").key("robot").get_resource<Path_builder>()));

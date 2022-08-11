@@ -6,6 +6,15 @@
 namespace controller{
     struct Controller_server;
 
+    struct Agent_values : json_cpp::Json_object {
+        Json_object_members(
+                Add_member(left);
+                Add_member(right);
+                Add_member(speed);
+        )
+        int left, right, speed;
+    };
+
     struct Controller_client : tcp_messages::Message_client {
         Routes(
                 Add_route("(.*)(step)", on_step, cell_world::Step);
@@ -16,6 +25,7 @@ namespace controller{
         bool stop();
         bool set_destination(const cell_world::Location &);
         bool set_behavior(Behavior);
+        int set_agent_values(const Agent_values &);
         Controller_server *local_server = nullptr;
     };
 }
