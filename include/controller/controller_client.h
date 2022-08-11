@@ -26,7 +26,6 @@ namespace controller{
         bool set_destination(const cell_world::Location &);
         bool set_behavior(Behavior);
         int set_agent_values(const Agent_values &);
-
         bool set_left_ticks(int left);
         bool set_right_ticks(int left);
         bool set_speed(int left);

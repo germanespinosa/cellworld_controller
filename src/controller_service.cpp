@@ -105,8 +105,8 @@ namespace controller {
         state = Controller_state::Playing;
         Controller_inputs ci;
         // TODO: if move done current = next, prev = current, next = move
-
-        while(state != Controller_state::Stopped){
+        // state != Controller_state::Stopped // TODO: add this back as loop condition
+        while(true){
             robot_mtx.lock();
             cout << "CONTROLLER STATE " << state << endl;
             if (this->tracking_client.capture.cool_down.time_out()){
