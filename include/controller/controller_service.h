@@ -12,7 +12,8 @@ namespace controller {
     enum Controller_state{
         Stopped,
         Playing,
-        Paused
+        Paused,
+        Tune
     };
     enum Robot_Mode{
         Initialize,
@@ -21,14 +22,15 @@ namespace controller {
         Waiting
     };
 
-//    struct Agent_values : json_cpp::Json_object {
-//        Json_object_members(
-//                Add_member(left);
-//                Add_member(right);
-//                Add_member(speed);
-//                )
-//        int left, right, speed;
-//    };
+    struct Tick_commands : json_cpp::Json_object {
+        Json_object_members(
+                Add_member(left);
+                Add_member(right);
+                Add_member(speed);
+                Add_member(move_number);
+                )
+        int left, right, speed, move_number;
+    };
 
     struct Controller_service : tcp_messages::Message_service {
 
@@ -39,6 +41,11 @@ namespace controller {
             Add_route_with_response("resume", resume_controller);
             Add_route_with_response("set_behavior", set_behavior, int);
             Add_route_with_response("set_agent_values", set_agent_values, Agent_values);
+            Add_route_with_response("set_left_ticks", set_left_ticks, int);
+            Add_route_with_response("set_right_ticks", set_right_ticks, int);
+            Add_route_with_response("set_speed", set_speed, int);
+            Add_route_with_response("move_number", agent_move_number, int);
+            Add_route_with_response("tune", tune_controller);
             Allow_subscription();
         );
 
@@ -50,6 +57,11 @@ namespace controller {
         bool set_behavior(int);
         static int get_port();
         static void set_logs_folder(const std::string &);
+        bool set_left_ticks(int);
+        bool set_right_ticks(int);
+        bool set_speed(int);
+        bool agent_move_number(int);
+        bool tune_controller();
     };
 
 
@@ -77,6 +89,11 @@ namespace controller {
         void set_occlusions(const std::string &occlusions, float margin = .45);
         bool set_behavior(int behavior);
         void join();
+        bool set_left_ticks(int);
+        bool set_right_ticks(int);
+        bool set_speed(int);
+        bool agent_move_number(int);;
+        bool tune();
 
         struct Controller_experiment_client : experiment::Experiment_client {
             explicit Controller_experiment_client();
@@ -162,5 +179,7 @@ namespace controller {
         cell_world::Location_visibility navigability;
         Pid_controller pid_controller;
         std::thread process;
+        Tick_commands tick;
+        int previous_move_number = 0;
     };
 }

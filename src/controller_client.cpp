@@ -57,8 +57,54 @@ namespace controller {
         {
             return local_server->set_agent_values(values);
         } else{
-            return send_request(Message("set_agent_values", values)).get_body<bool>();
+            return send_request(Message("set_agent_values", values)).get_body<int>();
         }
     }
+
+    bool Controller_client::set_left_ticks(int left) {
+        if (local_server)
+        {
+            return local_server->set_left_ticks(left);
+        } else{
+            return send_request(Message("set_left_ticks", left)).get_body<bool>();
+        }
+    }
+
+    bool Controller_client::set_right_ticks(int right) {
+        if (local_server)
+        {
+            return local_server->set_right_ticks(right);
+        } else{
+            return send_request(Message("set_right_ticks", right)).get_body<bool>();
+        }
+    }
+
+    bool Controller_client::set_speed(int speed) {
+        if (local_server)
+        {
+            return local_server->set_speed(speed);
+        } else{
+            return send_request(Message("set_speed", speed)).get_body<bool>();
+        }
+    }
+
+    bool Controller_client::agent_move_number(int move_number) {
+        if (local_server)
+        {
+            return local_server->agent_move_number(move_number);
+        } else{
+            return send_request(Message("move_number")).get_body<bool>();  // TODO: double check dont know if this is an int
+        }
+    }
+
+    bool Controller_client::tune() {
+        if (local_server)
+        {
+            return local_server->tune();
+        }else {
+            return send_request(Message("tune")).get_body<bool>();
+        }
+    }
+
 
 }

@@ -50,6 +50,10 @@ namespace controller {
             local_client->on_step(step);
         }
     }
+    bool Controller_service::tune_controller() {
+        return ((Controller_server *) _server)->tune();
+    }
+
 
     // this should be an int right
     int Controller_service::set_agent_values(const Agent_values &values) {
@@ -57,6 +61,19 @@ namespace controller {
         ((Controller_server *) _server)->agent.set_right(values.right);
         ((Controller_server *) _server)->agent.set_speed(values.speed);
         return ((Controller_server *) _server)->agent.update();
+    }
+
+    bool Controller_service::set_left_ticks(int left) {
+        return ((Controller_server *) _server)->set_left_ticks(left);
+    }
+    bool Controller_service::set_right_ticks(int right) {
+        return ((Controller_server *) _server)->set_right_ticks(right);
+    }
+    bool Controller_service::set_speed(int speed) {
+        return ((Controller_server *) _server)->set_speed(speed);
+    }
+    bool Controller_service::agent_move_number(int move_number) {
+        return ((Controller_server *) _server)->agent_move_number(move_number);
     }
 
 
@@ -88,11 +105,19 @@ namespace controller {
         state = Controller_state::Playing;
         Controller_inputs ci;
         // TODO: if move done current = next, prev = current, next = move
+
         while(state != Controller_state::Stopped){
             robot_mtx.lock();
+            cout << "CONTROLLER STATE " << state << endl;
             if (this->tracking_client.capture.cool_down.time_out()){
             // if there is no information from the tracker or controller is paused or destination timeout
-                if (!tracking_client.agent.is_valid() ||
+                if (state == Controller_state::Tune && tick.move_number != previous_move_number){
+                    agent.set_speed(tick.speed);
+                    agent.set_left(tick.left);
+                    agent.set_right(tick.right);
+                    agent.update();
+                    previous_move_number = tick.move_number;
+                } else if (!tracking_client.agent.is_valid() ||
                     state == Controller_state::Paused ||
                     destination_timer.time_out()){
                     agent.set_left(0);
@@ -160,6 +185,23 @@ namespace controller {
         return true;
     }
 
+    bool Controller_server::set_left_ticks(int left) {
+        tick.left = left;
+        return true;
+    }
+    bool Controller_server::set_right_ticks(int right) {
+        tick.right = right;
+        return true;
+    }
+    bool Controller_server::set_speed(int speed) {
+        tick.speed = speed;
+        return true;
+    }
+    bool Controller_server::agent_move_number(int move_number) {
+        tick.move_number = move_number;
+        return true;
+    }
+
     // finds next coordinate
     cell_world::Coordinates Controller_server::get_next_coordinate(const cell_world::Coordinates &current_coordinate) {
 
@@ -176,7 +218,10 @@ namespace controller {
 
 
 
-
+    bool Controller_server::tune() {
+        state = Controller_state::Tune;
+        return true;
+    }
 
     bool Controller_server::pause() {
         if (state == Controller_state::Playing) {
