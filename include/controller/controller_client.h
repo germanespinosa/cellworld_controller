@@ -31,6 +31,7 @@ namespace controller{
         bool set_speed(int left);
         bool agent_move_number(int move_number);
         bool tune();
+        bool is_move_done();
         Controller_server *local_server = nullptr;
     };
 }

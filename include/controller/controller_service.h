@@ -46,6 +46,7 @@ namespace controller {
             Add_route_with_response("set_speed", set_speed, int);
             Add_route_with_response("move_number", agent_move_number, int);
             Add_route_with_response("tune", tune_controller);
+            Add_route_with_response("is_move_done", is_move_done);
             Allow_subscription();
         );
 
@@ -62,6 +63,7 @@ namespace controller {
         bool set_speed(int);
         bool agent_move_number(int);
         bool tune_controller();
+        bool is_move_done();
     };
 
 
@@ -94,6 +96,7 @@ namespace controller {
         bool set_speed(int);
         bool agent_move_number(int);;
         bool tune();
+        bool is_move_done();
 
         struct Controller_experiment_client : experiment::Experiment_client {
             explicit Controller_experiment_client();

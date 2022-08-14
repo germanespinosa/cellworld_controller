@@ -106,5 +106,13 @@ namespace controller {
         }
     }
 
+    bool Controller_client::is_move_done(){
+        if (local_server){
+            return local_server->is_move_done();
+        } else {
+            return send_request(Message("is_move_done")).get_body<bool>();
+        }
+    }
+
 
 }

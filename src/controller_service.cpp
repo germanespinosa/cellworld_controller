@@ -60,7 +60,8 @@ namespace controller {
         ((Controller_server *) _server)->agent.set_left(values.left);
         ((Controller_server *) _server)->agent.set_right(values.right);
         ((Controller_server *) _server)->agent.set_speed(values.speed);
-        return ((Controller_server *) _server)->agent.update();
+        auto move_number = ((Controller_server *) _server)->agent.update();
+        return move_number;
     }
 
     bool Controller_service::set_left_ticks(int left) {
@@ -74,6 +75,10 @@ namespace controller {
     }
     bool Controller_service::agent_move_number(int move_number) {
         return ((Controller_server *) _server)->agent_move_number(move_number);
+    }
+
+    bool Controller_service::is_move_done() {
+        return ((Controller_server *) _server)->agent.is_move_done();
     }
 
 
@@ -102,29 +107,24 @@ namespace controller {
     }
 
     void Controller_server::controller_process() {                      // setting robot velocity
-        state = Controller_state::Playing;
+        //state = Controller_state::Playing;
+        state = Controller_state::Tune;
         Controller_inputs ci;
         // TODO: if move done current = next, prev = current, next = move
         // state != Controller_state::Stopped // TODO: add this back as loop condition
-        while(true){
+        while(state != Controller_state::Stopped && state != Controller_state::Tune){
+            cout << "ENTERED WHILE LOOP" << endl;
             robot_mtx.lock();
-            cout << "CONTROLLER STATE " << state << endl;
             if (this->tracking_client.capture.cool_down.time_out()){
             // if there is no information from the tracker or controller is paused or destination timeout
-                if (state == Controller_state::Tune && tick.move_number != previous_move_number){
-                    agent.set_speed(tick.speed);
-                    agent.set_left(tick.left);
-                    agent.set_right(tick.right);
-                    agent.update();
-                    previous_move_number = tick.move_number;
-                } else if (!tracking_client.agent.is_valid() ||
-                    state == Controller_state::Paused ||
-                    destination_timer.time_out()){
+              if (!tracking_client.agent.is_valid() ||
+                state == Controller_state::Paused ||
+                destination_timer.time_out()){
                     agent.set_left(0);
                     agent.set_right(0);
                     agent.set_speed(0);
                     agent.update();
-                } else {
+              } else {
                     // TODO: fix this to work for any spawn location and orientation
                     // Probably PID
                     if (mode == Initialize){
