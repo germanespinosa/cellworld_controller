@@ -54,6 +54,7 @@ namespace controller {
         return ((Controller_server *) _server)->tune();
     }
 
+
     // this should be an int right
     int Controller_service::set_agent_values(const Agent_values &values) {
         ((Controller_server *) _server)->agent.set_left(values.left);
@@ -93,11 +94,11 @@ namespace controller {
     }
 
     void Controller_server::controller_process() {                      // setting robot velocity
-        //state = Controller_state::Playing;
-        state = Controller_state::Tune;
+        state = Controller_state::Playing;
+        //state = Controller_state::Tune;
         Controller_inputs ci;
         // TODO: if move done current = next, prev = current, next = move
-        // state != Controller_state::Stopped // TODO: add this back as loop condition
+        // TODO: figure out way to reinitialize if gamepad intervention occurs -- if gamepad notification mode == initialize
         while(state != Controller_state::Stopped && state != Controller_state::Tune){
             cout << "ENTERED WHILE LOOP" << endl;
             robot_mtx.lock();
@@ -124,18 +125,18 @@ namespace controller {
                         agent.update();
                         mode = Moving; //TODO: make sure this changes
                     }
-                    if (agent.is_move_done() || mode == Waiting){
+                    if (agent.is_move_done() || mode == Waiting){        // TODO: this waits till move is done to get next coordinate need to sort out how to modify this for real robot
                         ci.location = tracking_client.agent.step.location;
                         if (mode!= Waiting){
                             //save_prev_coordinate = ci.previous_coordinate;
                             ci.previous_coordinate = ci.current_coordinate;
                         }
                         ci.current_coordinate = ci.next_coordinate;
-                        ci.next_coordinate = get_next_coordinate(ci.current_coordinate);
+                        ci.next_coordinate = get_next_coordinate(ci.current_coordinate);    // this is where the next coordinate is found
                         mode = Ready;
                     }
 
-                    // catch when destination reached
+                    // catch when destination reached ... send 0
                     if (ci.current_coordinate == ci.next_coordinate) {
                         agent.set_left(0);
                         agent.set_right(0);
@@ -192,6 +193,7 @@ namespace controller {
         state = Controller_state::Tune;
         return true;
     }
+
 
     bool Controller_server::pause() {
         if (state == Controller_state::Playing) {
