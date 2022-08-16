@@ -41,10 +41,6 @@ namespace controller {
             Add_route_with_response("resume", resume_controller);
             Add_route_with_response("set_behavior", set_behavior, int);
             Add_route_with_response("set_agent_values", set_agent_values, Agent_values);
-            Add_route_with_response("set_left_ticks", set_left_ticks, int);
-            Add_route_with_response("set_right_ticks", set_right_ticks, int);
-            Add_route_with_response("set_speed", set_speed, int);
-            Add_route_with_response("move_number", agent_move_number, int);
             Add_route_with_response("tune", tune_controller);
             Add_route_with_response("is_move_done", is_move_done);
             Allow_subscription();
@@ -58,10 +54,6 @@ namespace controller {
         bool set_behavior(int);
         static int get_port();
         static void set_logs_folder(const std::string &);
-        bool set_left_ticks(int);
-        bool set_right_ticks(int);
-        bool set_speed(int);
-        bool agent_move_number(int);
         bool tune_controller();
         bool is_move_done();
     };
@@ -91,10 +83,6 @@ namespace controller {
         void set_occlusions(const std::string &occlusions, float margin = .45);
         bool set_behavior(int behavior);
         void join();
-        bool set_left_ticks(int);
-        bool set_right_ticks(int);
-        bool set_speed(int);
-        bool agent_move_number(int);;
         bool tune();
         bool is_move_done();
 

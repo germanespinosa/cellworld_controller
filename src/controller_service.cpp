@@ -54,7 +54,6 @@ namespace controller {
         return ((Controller_server *) _server)->tune();
     }
 
-
     // this should be an int right
     int Controller_service::set_agent_values(const Agent_values &values) {
         ((Controller_server *) _server)->agent.set_left(values.left);
@@ -62,19 +61,6 @@ namespace controller {
         ((Controller_server *) _server)->agent.set_speed(values.speed);
         auto move_number = ((Controller_server *) _server)->agent.update();
         return move_number;
-    }
-
-    bool Controller_service::set_left_ticks(int left) {
-        return ((Controller_server *) _server)->set_left_ticks(left);
-    }
-    bool Controller_service::set_right_ticks(int right) {
-        return ((Controller_server *) _server)->set_right_ticks(right);
-    }
-    bool Controller_service::set_speed(int speed) {
-        return ((Controller_server *) _server)->set_speed(speed);
-    }
-    bool Controller_service::agent_move_number(int move_number) {
-        return ((Controller_server *) _server)->agent_move_number(move_number);
     }
 
     bool Controller_service::is_move_done() {
@@ -126,7 +112,7 @@ namespace controller {
                     agent.update();
               } else {
                     // TODO: fix this to work for any spawn location and orientation
-                    // Probably PID
+                    // Probably PID to get initializing position
                     if (mode == Initialize){
                         cout << "INITIALIZE ROBOT" << endl;
                         ci.location = tracking_client.agent.step.location;
@@ -185,22 +171,6 @@ namespace controller {
         return true;
     }
 
-    bool Controller_server::set_left_ticks(int left) {
-        tick.left = left;
-        return true;
-    }
-    bool Controller_server::set_right_ticks(int right) {
-        tick.right = right;
-        return true;
-    }
-    bool Controller_server::set_speed(int speed) {
-        tick.speed = speed;
-        return true;
-    }
-    bool Controller_server::agent_move_number(int move_number) {
-        tick.move_number = move_number;
-        return true;
-    }
 
     // finds next coordinate
     cell_world::Coordinates Controller_server::get_next_coordinate(const cell_world::Coordinates &current_coordinate) {
