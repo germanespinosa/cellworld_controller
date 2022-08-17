@@ -100,7 +100,6 @@ namespace controller {
         // TODO: if move done current = next, prev = current, next = move
         // TODO: figure out way to reinitialize if gamepad intervention occurs -- if gamepad notification mode == initialize
         while(state != Controller_state::Stopped && state != Controller_state::Tune){
-            cout << "ENTERED WHILE LOOP" << endl;
             robot_mtx.lock();
             if (this->tracking_client.capture.cool_down.time_out()){
             // if there is no information from the tracker or controller is paused or destination timeout
