@@ -24,7 +24,10 @@ namespace controller{
 
         out.left = tick.first;
         out.right = tick.second;
+//        if
         out.speed = ROBOT_SPEED;
+        // TODO: come up with way to assign speed based on move for time being could do logic based on out.l/r
+        // see if vector pair - triple
         return out;
     }
 
