@@ -99,17 +99,21 @@ namespace controller {
         Controller_inputs ci;
         // TODO: if move done current = next, prev = current, next = move
         // TODO: figure out way to reinitialize if gamepad intervention occurs -- if gamepad notification mode == initialize
-        while(state != Controller_state::Stopped && state != Controller_state::Tune){
+        while(state != Controller_state::Stopped){
             robot_mtx.lock();
             if (this->tracking_client.capture.cool_down.time_out()){
             // if there is no information from the tracker or controller is paused or destination timeout
+            // fixed tune logic - if tune while loop is basically skipped however process will continue to run to detect state change
               if (!tracking_client.agent.is_valid() ||
                 state == Controller_state::Paused ||
+                state == Controller_state::Tune ||
                 destination_timer.time_out()){
-                    agent.set_left(0);
-                    agent.set_right(0);
-                    agent.set_speed(0);
-                    agent.update();
+                  if (state != Controller_state::Tune) {
+                      agent.set_left(0);
+                      agent.set_right(0);
+                      agent.set_speed(0);
+                      agent.update();
+                  }
               } else {
                     // TODO: fix this to work for any spawn location and orientation
                     // Probably PID to get initializing position
@@ -195,11 +199,8 @@ namespace controller {
 
 
     bool Controller_server::pause() {
-        if (state == Controller_state::Playing) {
-            state = Controller_state::Paused;
-            return true;
-        }
-        return false;
+        state = Controller_state::Paused;
+        return true;
     }
 
     bool Controller_server::resume() {
