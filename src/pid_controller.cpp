@@ -60,7 +60,8 @@ namespace controller{
     }
     std::pair<int,int> Pid_controller::get_ticks(const cell_world::Coordinates &delta_move, int side){
         // TODO:get these values from json file ints m0_L, m0_R ... etc
-        vector<pair<int,int>> move_ticks = {{1,600},{231,535},{432,432},{535,231},{600,1},{450,-450}}; // m0,m1,m2,m3,m4,m5    212,815
+//        vector<pair<int,int>> move_ticks = {{1,600},{231,535},{432,432},{535,231},{600,1},{450,-450}}; // m0,m1,m2,m3,m4,m5    212,815
+        vector<pair<int,int>> move_ticks = {{5,600},{73,284},{256,256},{284,73},{600,5},{338,-338}};
         // side 0 condition
         Coordinates m0 = Coordinates(-1, 1);
         Coordinates m1 = Coordinates(1, 1);
