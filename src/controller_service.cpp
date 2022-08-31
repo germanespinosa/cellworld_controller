@@ -1,3 +1,4 @@
+// TODO: why does joystick intervention act weird
 #include <controller/controller_service.h>
 #include <filesystem>
 #include <iostream>
@@ -109,29 +110,31 @@ namespace controller {
                 state == Controller_state::Tune ||
                 destination_timer.time_out()){
                   if (state != Controller_state::Tune) {
-                      agent.set_left(0);
+                      agent.set_left(0); // need to send 0 or will stay at last pwm sent
                       agent.set_right(0);
-                      agent.set_speed(0);
-                      agent.update();
+                      agent.set_speed(-1);
+                      move_number = agent.update();
                   }
               } else {
                     // TODO: fix this to work for any spawn location and orientation
                     // Probably PID to get initializing position
                     if (mode == Initialize){
                         cout << "INITIALIZE ROBOT" << endl;
+                        // ERROR: the current and next coordinate need to be modified
                         ci.location = tracking_client.agent.step.location;
                         ci.current_coordinate = Coordinates(-2,0);
                         ci.next_coordinate = cells[cells.find(ci.location)].coordinates;  // based on location
                         agent.set_speed(ROBOT_SPEED);
-                        agent.set_left(-216);
-                        agent.set_right(-216);
-                        agent.update();
+                        agent.set_left(10);
+                        agent.set_right(10);
+                        move_number = agent.update();
+                        cout << "INITIAL MOVE NUM" << move_number << endl;
                         mode = Moving; //TODO: make sure this changes
                     }
                     if (agent.is_move_done() || mode == Waiting){        // TODO: this waits till move is done to get next coordinate need to sort out how to modify this for real robot
                         ci.location = tracking_client.agent.step.location;
                         if (mode!= Waiting){
-                            //save_prev_coordinate = ci.previous_coordinate;
+                            cout << "MOVE NUMBER " << move_number << endl;
                             ci.previous_coordinate = ci.current_coordinate;
                         }
                         ci.current_coordinate = ci.next_coordinate;
@@ -144,17 +147,17 @@ namespace controller {
                         agent.set_left(0);
                         agent.set_right(0);
                         agent.set_speed(0);
-                        agent.update();
+                        move_number = agent.update();
                         mode = Waiting;
-                        cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
-                        cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
-                        cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
+//                        cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
+//                        cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
+//                        cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
                     } else if (mode == Ready) {
                         auto robot_command = pid_controller.process(ci, behavior);
                         agent.set_speed(robot_command.speed);
                         agent.set_left(robot_command.left);
                         agent.set_right(robot_command.right);
-                        agent.update();
+                        move_number = agent.update();
                         mode = Moving;
                         // TODO: set previous coordinate to current coordinate
                         // TODO: change mode to move instead of initialize
@@ -168,7 +171,7 @@ namespace controller {
     }
 
     bool Controller_server::set_destination(const cell_world::Location &new_destination) {
-        cout << "New destination: " << new_destination << endl;
+//        cout << "New destination: " << new_destination << endl;
         destination = new_destination;
         destination_timer = Timer(5);
         new_destination_data = true;
