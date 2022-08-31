@@ -13,7 +13,7 @@ namespace controller {
         Stopped,
         Playing,
         Paused,
-        Tune
+        Tune,
     };
     enum Robot_Mode{
         Initialize,
@@ -172,5 +172,6 @@ namespace controller {
         std::thread process;
         Tick_commands tick;
         int previous_move_number = 0;
+        int move_number;
     };
 }
