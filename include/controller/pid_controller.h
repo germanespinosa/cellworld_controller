@@ -3,7 +3,7 @@
 #include <cell_world.h>
 #include <vector>
 
-#define ROBOT_SPEED 1800
+#define ROBOT_SPEED 1700
 
 namespace controller {
     enum Behavior{
