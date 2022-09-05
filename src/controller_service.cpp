@@ -122,11 +122,11 @@ namespace controller {
                         cout << "INITIALIZE ROBOT" << endl;
                         // ERROR: the current and next coordinate need to be modified
                         ci.location = tracking_client.agent.step.location;
-                        ci.current_coordinate = Coordinates(-2,0);
-                        ci.next_coordinate = cells[cells.find(ci.location)].coordinates;  // based on location
-                        agent.set_speed(ROBOT_SPEED);
-                        agent.set_left(10);
-                        agent.set_right(10);
+                        ci.current_coordinate = Coordinates(0,0);//cells[cells.find(ci.location)].coordinates;
+                        ci.next_coordinate = ci.current_coordinate.operator+(Coordinates(2,0));  // based on location
+                        agent.set_speed(500);
+                        agent.set_left(0);
+                        agent.set_right(0);
                         move_number = agent.update();
                         cout << "INITIAL MOVE NUM" << move_number << endl;
                         mode = Moving; //TODO: make sure this changes
@@ -149,9 +149,9 @@ namespace controller {
                         agent.set_speed(0);
                         move_number = agent.update();
                         mode = Waiting;
-//                        cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
-//                        cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
-//                        cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
+                        cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
+                        cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
+                        cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
                     } else if (mode == Ready) {
                         auto robot_command = pid_controller.process(ci, behavior);
                         agent.set_speed(robot_command.speed);
