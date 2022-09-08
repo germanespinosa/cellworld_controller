@@ -52,4 +52,70 @@ namespace controller {
         }
     }
 
+
+
+
+    bool Prey_controller_client::pause() {
+        if (local_server)
+        {
+            return local_server->pause();
+        }else {
+            return send_request(Message("pause_predator")).get_body<bool>();
+        }
+    }
+
+    bool Prey_controller_client::resume() {
+        if (local_server)
+        {
+            return local_server->resume();
+        }else {
+            return send_request(Message("resume_predator")).get_body<bool>();
+        }
+    }
+
+    bool Prey_controller_client::stop() {
+        if (local_server)
+        {
+            return true;
+        }else {
+            return send_request(Message("stop_predator")).get_body<bool>();
+        }
+    }
+
+
+    bool Prey_controller_client::set_destination(const cell_world::Location &location) {
+        if (local_server)
+        {
+            return local_server->set_destination(location);
+        }else {
+            return send_request(Message("set_destination", location)).get_body<bool>();
+        }
+    }
+
+    int Prey_controller_client::set_agent_values(const Agent_values &values) {
+        if (local_server)
+        {
+            return local_server->set_agent_values(values);
+        } else{
+            return send_request(Message("set_agent_values", values)).get_body<int>();
+        }
+    }
+
+
+    bool Prey_controller_client::tune() {
+        if (local_server)
+        {
+            return local_server->tune();
+        }else {
+            return send_request(Message("tune")).get_body<bool>();
+        }
+    }
+
+    bool Prey_controller_client::is_move_done(){
+        if (local_server){
+            return local_server->is_move_done();
+        } else {
+            return send_request(Message("is_move_done")).get_body<bool>();
+        }
+    }
 }

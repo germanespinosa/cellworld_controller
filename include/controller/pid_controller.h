@@ -74,4 +74,5 @@ namespace controller {
         Pid_inputs in;
         cell_world::Timer timer;
     };
+
 }
