@@ -1,4 +1,5 @@
 #include <controller/controller_service.h>
+#include <controller/controller_service.h>
 #include <filesystem>
 #include <iostream>
 #include <mutex>
@@ -320,7 +321,7 @@ namespace controller {
     }
 
     int Prey_controller_service::get_port() {
-        string port_str(std::getenv("CONTROLLER_PORT") ? std::getenv("CONTROLLER_PORT") : "4590");
+        string port_str(std::getenv("PREY_CONTROLLER_PORT") ? std::getenv("PREY_CONTROLLER_PORT") : "4591");
         return atoi(port_str.c_str());
     }
 
@@ -534,7 +535,7 @@ namespace controller {
     void Prey_controller_server::Controller_tracking_client::on_step(const Step &step) {
         if (!capture.cool_down.time_out()) return;
         if (step.agent_name == agent.agent_name) {
-            if (agent.last_update.to_seconds()>.1) {
+            if (agent.last_update.to_seconds()>.5) {
                 controller_server->send_step(step);
                 agent.last_update.reset();
             }
@@ -622,13 +623,5 @@ namespace controller {
 
     Prey_controller_server::Controller_experiment_client::Controller_experiment_client() {
     }
-
-
-
-
-
-
-
-
 }
 
