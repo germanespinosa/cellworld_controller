@@ -392,66 +392,62 @@ namespace controller {
         // TODO: figure out way to reinitialize if gamepad intervention occurs -- if gamepad notification mode == initialize
         while(state != Controller_state::Stopped){
             prey_robot_mtx.lock();
-            if (this->tracking_client.capture.cool_down.time_out()){
-                // if there is no information from the tracker or controller is paused or destination timeout
-                // fixed tune logic - if tune while loop is basically skipped however process will continue to run to detect state change
-                if (!tracking_client.agent.is_valid() ||
-                    state == Controller_state::Paused ||
-                    state == Controller_state::Tune ||
-                    destination_timer.time_out()){
-                    if (state != Controller_state::Tune) {
-                        agent.set_left(0); // need to send 0 or will stay at last pwm sent
-                        agent.set_right(0);
-                        agent.set_speed(-1);
-                        move_number = agent.update();
+            if (!tracking_client.agent.is_valid() ||
+                state == Controller_state::Paused ||
+                state == Controller_state::Tune ||
+                destination_timer.time_out()){
+                if (state != Controller_state::Tune) {
+                    agent.set_left(0); // need to send 0 or will stay at last pwm sent
+                    agent.set_right(0);
+                    agent.set_speed(-1);
+                    move_number = agent.update();
+                }
+            } else {
+                // TODO: fix this to work for any spawn location and orientation
+                // Probably PID to get initializing position
+                if (mode == Initialize){
+                    cout << "INITIALIZE ROBOT" << endl;
+                    // ERROR: the current and next coordinate need to be modified
+                    ci.location = tracking_client.agent.step.location;
+                    ci.current_coordinate = Coordinates(0,0);//cells[cells.find(ci.location)].coordinates;
+                    ci.next_coordinate = ci.current_coordinate.operator+(Coordinates(2,0));  // based on location
+                    agent.set_speed(500);
+                    agent.set_left(0);
+                    agent.set_right(0);
+                    move_number = agent.update();
+                    cout << "INITIAL MOVE NUM" << move_number << endl;
+                    mode = Moving; //TODO: make sure this changes
+                }
+                if (agent.is_move_done() || mode == Waiting){        // TODO: this waits till move is done to get next coordinate need to sort out how to modify this for real robot
+                    ci.location = tracking_client.agent.step.location;
+                    if (mode!= Waiting){
+                        cout << "MOVE NUMBER " << move_number << endl;
+                        ci.previous_coordinate = ci.current_coordinate;
                     }
-                } else {
-                    // TODO: fix this to work for any spawn location and orientation
-                    // Probably PID to get initializing position
-                    if (mode == Initialize){
-                        cout << "INITIALIZE ROBOT" << endl;
-                        // ERROR: the current and next coordinate need to be modified
-                        ci.location = tracking_client.agent.step.location;
-                        ci.current_coordinate = Coordinates(0,0);//cells[cells.find(ci.location)].coordinates;
-                        ci.next_coordinate = ci.current_coordinate.operator+(Coordinates(2,0));  // based on location
-                        agent.set_speed(500);
-                        agent.set_left(0);
-                        agent.set_right(0);
-                        move_number = agent.update();
-                        cout << "INITIAL MOVE NUM" << move_number << endl;
-                        mode = Moving; //TODO: make sure this changes
-                    }
-                    if (agent.is_move_done() || mode == Waiting){        // TODO: this waits till move is done to get next coordinate need to sort out how to modify this for real robot
-                        ci.location = tracking_client.agent.step.location;
-                        if (mode!= Waiting){
-                            cout << "MOVE NUMBER " << move_number << endl;
-                            ci.previous_coordinate = ci.current_coordinate;
-                        }
-                        ci.current_coordinate = ci.next_coordinate;
-                        ci.next_coordinate = get_next_coordinate(ci.current_coordinate);    // this is where the next coordinate is found
-                        mode = Ready;
-                    }
+                    ci.current_coordinate = ci.next_coordinate;
+                    ci.next_coordinate = get_next_coordinate(ci.current_coordinate);    // this is where the next coordinate is found
+                    mode = Ready;
+                }
 
-                    // catch when destination reached ... send 0
-                    if (ci.current_coordinate == ci.next_coordinate) {
-                        agent.set_left(0);
-                        agent.set_right(0);
-                        agent.set_speed(0);
-                        move_number = agent.update();
-                        mode = Waiting;
-                        cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
-                        cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
-                        cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
-                    } else if (mode == Ready) {
-                        auto robot_command = tick_controller.process(ci);
-                        agent.set_speed(robot_command.speed);
-                        agent.set_left(robot_command.left);
-                        agent.set_right(robot_command.right);
-                        move_number = agent.update();
-                        mode = Moving;
-                        // TODO: set previous coordinate to current coordinate
-                        // TODO: change mode to move instead of initialize
-                    }
+                // catch when destination reached ... send 0
+                if (ci.current_coordinate == ci.next_coordinate) {
+                    agent.set_left(0);
+                    agent.set_right(0);
+                    agent.set_speed(0);
+                    move_number = agent.update();
+                    mode = Waiting;
+                    cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
+                    cout << "CURRENT COORDINATE: " << ci.current_coordinate << endl;
+                    cout << "NEXT COORDINATE: " << ci.next_coordinate << endl;
+                } else if (mode == Ready) {
+                    auto robot_command = tick_controller.process(ci);
+                    agent.set_speed(robot_command.speed);
+                    agent.set_left(robot_command.left);
+                    agent.set_right(robot_command.right);
+                    move_number = agent.update();
+                    mode = Moving;
+                    // TODO: set previous coordinate to current coordinate
+                    // TODO: change mode to move instead of initialize
                 }
             }
             prey_robot_mtx.unlock();
@@ -533,7 +529,6 @@ namespace controller {
     }
 
     void Prey_controller_server::Controller_tracking_client::on_step(const Step &step) {
-        if (!capture.cool_down.time_out()) return;
         if (step.agent_name == agent.agent_name) {
             if (agent.last_update.to_seconds()>.5) {
                 controller_server->send_step(step);
@@ -545,9 +540,9 @@ namespace controller {
             adversary.step = step;
             adversary.timer = Timer(.5);
             if (contains_agent_state(agent.agent_name)) {
-                auto predator = get_current_state(agent.agent_name);
+                auto predator = get_current_state(adversary.agent_name);
                 prey_robot_mtx.lock();
-                auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
+                auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), agent.step.location);
                 if (is_captured) {
                     controller_server->agent.set_left(0);
                     controller_server->agent.set_right(0);
@@ -559,16 +554,12 @@ namespace controller {
                     controller_server->send_capture(step.frame);
                 }
                 prey_robot_mtx.unlock();
-                if (visibility.is_visible(predator.location, step.location) &&
-                    to_degrees(angle_difference(predator.location.atan(step.location), to_radians(predator.rotation))) < view_angle / 2) {
-                    if (peeking.is_seen(predator.location, step.location)) {
-                        if (adversary.last_update.to_seconds()>.1) {
-                            controller_server->send_step(step);
-                            adversary.last_update.reset();
-                        }
+                if (visibility.is_visible(agent.step.location, predator.location) &&
+                    to_degrees(angle_difference(predator.location.atan(agent.step.location), to_radians(predator.rotation))) < view_angle / 2) {
+                    if (adversary.last_update.to_seconds()>.1) {
+                        controller_server->send_step(step);
+                        adversary.last_update.reset();
                     }
-                } else {
-                    peeking.not_visible();
                 }
             }
         }
@@ -585,8 +576,7 @@ namespace controller {
             adversary(adversary_name),
             visibility(visibility),
             view_angle(view_angle),
-            capture(capture),
-            peeking(peeking){
+            capture(capture){
     }
 
     Prey_controller_server::Controller_tracking_client::Controller_tracking_client(cell_world::World world,
@@ -597,15 +587,13 @@ namespace controller {
             adversary(adversary_name),
             visibility(world.create_cell_group(), world.cell_shape, world.cell_transformation),
             view_angle(view_angle),
-            capture(Resources::from("capture_parameters").key("default").get_resource<Capture_parameters>(), world),
-            peeking(Resources::from("peeking_parameters").key("default").get_resource<Peeking_parameters>(), world){
+            capture(Resources::from("capture_parameters").key("default").get_resource<Capture_parameters>(), world){
 
     }
 
     void Prey_controller_server::Controller_tracking_client::set_occlusions(Cell_group &cells) {
         visibility.update_occlusions(cells);
         capture.visibility.update_occlusions(cells);
-        peeking.peeking_visibility.update_occlusions(cells);
     }
 
     void Prey_controller_server::Controller_experiment_client::on_experiment_started(

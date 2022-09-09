@@ -214,7 +214,6 @@ namespace controller {
             Prey_controller_server *controller_server;
             float view_angle;
             cell_world::Capture capture;
-            cell_world::Peeking peeking;
         } &tracking_client;
 
         Prey_controller_server( Tick_agent &,
