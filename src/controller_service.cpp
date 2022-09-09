@@ -410,7 +410,7 @@ namespace controller {
                     // ERROR: the current and next coordinate need to be modified
                     ci.location = tracking_client.agent.step.location;
                     ci.current_coordinate = Coordinates(0,0);//cells[cells.find(ci.location)].coordinates;
-                    ci.next_coordinate = ci.current_coordinate.operator+(Coordinates(2,0));  // based on location
+                    ci.next_coordinate = ci.current_coordinate.operator + (Coordinates(2,0));  // based on location
                     agent.set_speed(500);
                     agent.set_left(0);
                     agent.set_right(0);
@@ -452,7 +452,6 @@ namespace controller {
             }
             prey_robot_mtx.unlock();
             //prevents overflowing the robot ( max 10 commands per second)
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
