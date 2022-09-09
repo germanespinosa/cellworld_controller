@@ -149,44 +149,35 @@ namespace controller {
     };
 
     struct Prey_controller_service : tcp_messages::Message_service {
-
-
         Routes (
-                Add_route_with_response("set_destination", set_destination, cell_world::Location);
+                Add_route_with_response("set_destination", set_destination, cell_world::Coordinates);
                 Add_route_with_response("stop", stop_controller);
                 Add_route_with_response("pause", pause_controller);
                 Add_route_with_response("resume", resume_controller);
                 Add_route_with_response("set_behavior", set_behavior, int);
-                Add_route_with_response("set_agent_values", set_agent_values, Agent_values);
                 Add_route_with_response("tune", tune_controller);
-                Add_route_with_response("is_move_done", is_move_done);
                 Allow_subscription();
         );
 
-        bool set_destination(const cell_world::Location &);
+        bool set_destination(const cell_world::Coordinates &);
         bool stop_controller();
-        int set_agent_values(const Agent_values &);
         bool pause_controller();
         bool resume_controller();
         bool set_behavior(int);
         static int get_port();
         static void set_logs_folder(const std::string &);
         bool tune_controller();
-        bool is_move_done();
     };
 
     struct Prey_controller_server : tcp_messages::Message_server<Prey_controller_service> {
         void send_step(const cell_world::Step &);
         void send_capture(int);
-        bool set_destination(const cell_world::Location &);
-        int set_agent_values(const Agent_values &);
+        bool set_destination(const cell_world::Coordinates &);
         bool pause();
         bool resume();
         void set_occlusions(const std::string &occlusions, float margin = .45);
         bool set_behavior(int behavior);
-        void join();
         bool tune();
-        bool is_move_done();
 
         struct Controller_experiment_client : experiment::Experiment_client {
             explicit Controller_experiment_client();
@@ -222,7 +213,7 @@ namespace controller {
 
 
         void controller_process();
-        cell_world::Coordinates get_next_coordinate(const cell_world::Coordinates &current_coordinate);
+        cell_world::Move get_next_move();
 
         template< typename T, typename... Ts>
         T &create_local_client(Ts... vs){
@@ -255,8 +246,9 @@ namespace controller {
 
 
         void set_occlusions(cell_world::Cell_group &);
+        void join();
 
-        cell_world::Location destination;
+        cell_world::Coordinates destination;
         cell_world::Timer destination_timer;
         bool new_destination_data;
         std::atomic<Controller_state> state;
@@ -270,8 +262,5 @@ namespace controller {
         cell_world::Location_visibility navigability;
         Tick_controller tick_controller;
         std::thread process;
-        Tick_commands tick;
-        int previous_move_number = 0;
-        int move_number;
     };
 }

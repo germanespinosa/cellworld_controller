@@ -52,9 +52,6 @@ namespace controller {
         }
     }
 
-
-
-
     bool Prey_controller_client::pause() {
         if (local_server)
         {
@@ -83,39 +80,20 @@ namespace controller {
     }
 
 
-    bool Prey_controller_client::set_destination(const cell_world::Location &location) {
+    bool Prey_controller_client::set_destination(const cell_world::Coordinates &coord) {
         if (local_server)
         {
-            return local_server->set_destination(location);
+            return local_server->set_destination(coord);
         }else {
-            return send_request(Message("set_destination", location)).get_body<bool>();
+            return send_request(Message("set_destination", coord)).get_body<bool>();
         }
     }
-
-    int Prey_controller_client::set_agent_values(const Agent_values &values) {
-        if (local_server)
-        {
-            return local_server->set_agent_values(values);
-        } else{
-            return send_request(Message("set_agent_values", values)).get_body<int>();
-        }
-    }
-
-
     bool Prey_controller_client::tune() {
         if (local_server)
         {
             return local_server->tune();
         }else {
             return send_request(Message("tune")).get_body<bool>();
-        }
-    }
-
-    bool Prey_controller_client::is_move_done(){
-        if (local_server){
-            return local_server->is_move_done();
-        } else {
-            return send_request(Message("is_move_done")).get_body<bool>();
         }
     }
 }

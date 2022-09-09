@@ -38,10 +38,8 @@ namespace controller{
         bool pause();
         bool resume();
         bool stop();
-        bool set_destination(const cell_world::Location &);
-        int set_agent_values(const Agent_values &);
+        bool set_destination(const cell_world::Coordinates &);
         bool tune();
-        bool ready_to_receive_destination();
         bool is_move_done();
         Prey_controller_server *local_server = nullptr;
     };

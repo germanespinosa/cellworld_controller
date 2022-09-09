@@ -1,6 +1,5 @@
 #pragma once
-#include <easy_tcp.h>
-#include <json_cpp.h>
+#include <cell_world.h>
 
 namespace controller {
     struct Agent_operational_limits :json_cpp::Json_object {
@@ -28,13 +27,8 @@ namespace controller {
     };
 
     struct Tick_agent {
-        virtual void set_left(int) = 0;
-        virtual void set_right(int) = 0;
-        virtual void set_speed(int) = 0;
-        virtual void capture() = 0;
-        virtual int update() = 0;
-        virtual bool stop();
-        virtual bool is_move_done() = 0;
-        virtual void move_finished(int) {};
+        virtual bool is_ready() = 0;
+        virtual void execute_move(cell_world::Move) = 0;
+        cell_world::Coordinates current_coordinates;
     };
 }
