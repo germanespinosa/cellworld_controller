@@ -45,8 +45,9 @@ namespace controller{
         Coordinates side5 = Coordinates(1, -1);
         Coordinates sides[] = {side0, side1, side2, side3, side4, side5};
         int side_count = 0;
+        // loops through all sides to find match
         for (auto &c: sides){
-            if (delta_side == c) return side_count;
+            if (delta_side == c) return side_count; // return side match
             side_count ++;
         }
         cout << "PROBLEM NO SIDE MATCH" <<endl;
@@ -55,8 +56,7 @@ namespace controller{
     }
     std::pair<int,int> Tick_controller::get_ticks(const cell_world::Coordinates &delta_move, int side){
         // TODO:get these values from json file ints m0_L, m0_R ... etc
-//        vector<pair<int,int>> move_ticks = {{1,600},{231,535},{432,432},{535,231},{600,1},{450,-450}}; // m0,m1,m2,m3,m4,m5    212,815
-        vector<pair<int,int>> move_ticks = {{5,600},{73,284},{256,256},{284,73},{600,5},{338,-338}};
+        vector<pair<int,int>> move_ticks = {{1,600},{231,535},{432,432},{535,231},{600,1},{450,-450}}; // m0,m1,m2,m3,m4,m5    212,815
         // side 0 condition
         Coordinates m0 = Coordinates(-1, 1);
         Coordinates m1 = Coordinates(1, 1);
@@ -67,6 +67,7 @@ namespace controller{
         Coordinates deltas[] = {m0, m1, m2, m3, m4, m5};
         int count = 0;
         int delta_index;
+
         // find match
         for (auto &d: deltas){
             if (delta_move == d) delta_index = count;
@@ -82,11 +83,3 @@ namespace controller{
     }
 }
 
-//{"m1": {'L': 212, 'R': 815},
-//"m2": {'L': 231, 'R': 535},
-//"m3": {'L': 432, 'R': 432},
-//"m4": {'L': 535, 'R': 231},
-//"m5": {'L': 815, 'R': 212},
-//"m6": {'L': 450, 'R': -450},
-//"m7": {'L': 420, 'R': -420},
-//"m8": {'L': 216, 'R': 216}}

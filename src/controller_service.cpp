@@ -404,11 +404,11 @@ namespace controller {
                     cout << "INITIALIZE ROBOT" << endl;
                     // ERROR: the current and next coordinate need to be modified
                     ci.location = tracking_client.agent.step.location;
-                    ci.current_coordinate = Coordinates(0,0);//cells[cells.find(ci.location)].coordinates;
-                    ci.next_coordinate = ci.current_coordinate.operator + (Coordinates(2,0));  // based on location
-                    agent.set_speed(500);
-                    agent.set_left(0);
-                    agent.set_right(0);
+                    ci.current_coordinate = Coordinates(-20,0);//cells[cells.find(ci.location)].coordinates;
+                    ci.next_coordinate = cells[cells.find(ci.location)].coordinates;  // based on location
+                    agent.set_speed(ROBOT_SPEED);
+                    agent.set_left(-216);
+                    agent.set_right(-216);
                     move_number = agent.update();
                     cout << "INITIAL MOVE NUM" << move_number << endl;
                     mode = Moving; //TODO: make sure this changes
@@ -428,7 +428,7 @@ namespace controller {
                 if (ci.current_coordinate == ci.next_coordinate) {
                     agent.set_left(0);
                     agent.set_right(0);
-                    agent.set_speed(0);
+                    agent.set_speed(0);  // ?
                     move_number = agent.update();
                     mode = Waiting;
                     cout << "PREVIOUS COORDINATE: " << ci.previous_coordinate << endl;
@@ -446,6 +446,7 @@ namespace controller {
                 }
             }
             prey_robot_mtx.unlock();
+            this_thread::sleep_for(100ms);
             //prevents overflowing the robot ( max 10 commands per second)
         }
     }

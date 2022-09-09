@@ -12,13 +12,11 @@ namespace controller{
         double t = timer.to_seconds() * 30;
         timer.reset();
         if (behavior==Explore){
-            cout << "E";
             speed = parameters.explore_speed;
             P_value = parameters.P_explore;
             I_value = parameters.I_explore;
             D_value = parameters.D_explore;
         } else {
-            cout << "P";
             speed = parameters.pursue_speed;
             P_value = parameters.P_pursue;
             I_value = parameters.I_pursue;
@@ -44,7 +42,6 @@ namespace controller{
         }
 
         double adjustment = error * P_value - error_derivative * D_value + error_integral * I_value;
-        cout << "INT E "<< error_integral << endl;
         out.left =  normalized_error * speed * ( dist + 1 ) - adjustment;
         out.right = normalized_error * speed * ( dist + 1 ) + adjustment;
         // catches outliers
@@ -58,7 +55,7 @@ namespace controller{
             out.right *= RATIO;
             out.left *= RATIO;
         }
-        cout << out.left << " " << out.right << " " << theta << " " << destination_theta << " " << dist << endl;
+//        cout << out.left << " " << out.right << " " << theta << " " << destination_theta << " " << dist << endl;
         return out;
     }
 
