@@ -392,16 +392,11 @@ namespace controller {
         // TODO: figure out way to reinitialize if gamepad intervention occurs -- if gamepad notification mode == initialize
         while(state != Controller_state::Stopped){
             prey_robot_mtx.lock();
-            if (!tracking_client.agent.is_valid() ||
-                state == Controller_state::Paused ||
-                state == Controller_state::Tune ||
-                destination_timer.time_out()){
-                if (state != Controller_state::Tune) {
-                    agent.set_left(0); // need to send 0 or will stay at last pwm sent
-                    agent.set_right(0);
-                    agent.set_speed(-1);
-                    move_number = agent.update();
-                }
+            if (!tracking_client.agent.is_valid()){
+                agent.set_left(0); // need to send 0 or will stay at last pwm sent
+                agent.set_right(0);
+                agent.set_speed(-1);
+                move_number = agent.update();
             } else {
                 // TODO: fix this to work for any spawn location and orientation
                 // Probably PID to get initializing position
