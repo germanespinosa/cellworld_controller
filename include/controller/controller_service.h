@@ -6,7 +6,6 @@
 #include <agent_tracking/tracking_client.h>
 #include <experiment/experiment_client.h>
 #include <controller/controller_client.h>
-#include <controller/tick_controller.h>
 
 namespace controller {
 
@@ -167,100 +166,5 @@ namespace controller {
         static int get_port();
         static void set_logs_folder(const std::string &);
         bool tune_controller();
-    };
-
-    struct Prey_controller_server : tcp_messages::Message_server<Prey_controller_service> {
-        void send_step(const cell_world::Step &);
-        void send_capture(int);
-        bool set_destination(const cell_world::Coordinates &);
-        bool pause();
-        bool resume();
-        void set_occlusions(const std::string &occlusions, float margin = .45);
-        bool set_behavior(int behavior);
-        bool tune();
-
-        struct Controller_experiment_client : experiment::Experiment_client {
-            explicit Controller_experiment_client();
-            void on_experiment_started(const experiment::Start_experiment_response &experiment) override;
-            void on_episode_started(const std::string &experiment_name) override;
-            Prey_controller_server *controller_server;
-        } &experiment_client;
-
-        struct Controller_tracking_client : agent_tracking::Tracking_client {
-            Controller_tracking_client(cell_world::Location_visibility &visibility,
-                                       float view_angle,
-                                       cell_world::Capture &capture,
-                                       cell_world::Peeking &peeking,
-                                       const std::string &agent_name,
-                                       const std::string &adversary_name);
-            Controller_tracking_client(cell_world::World,
-                                       float view_angle,
-                                       const std::string &agent_name,
-                                       const std::string &adversary_name);
-            void on_step(const cell_world::Step &step) override;
-            void set_occlusions(cell_world::Cell_group &);
-            Agent_data agent;
-            Agent_data adversary;
-            cell_world::Location_visibility visibility;
-            Prey_controller_server *controller_server;
-            float view_angle;
-            cell_world::Capture capture;
-        } &tracking_client;
-
-        Prey_controller_server( Tick_agent &,
-                          Controller_tracking_client &,
-                          Controller_experiment_client &);
-
-
-        void controller_process();
-        cell_world::Move get_next_move();
-
-        template< typename T, typename... Ts>
-        T &create_local_client(Ts... vs){
-            static_assert(std::is_base_of<Controller_client, T>::value, "T must inherit from Controller_client");
-            auto new_local_client = new T{ vs... };
-            local_clients.push_back((Controller_client *) new_local_client);
-            new_local_client->local_server = this;
-            return *new_local_client;
-        }
-
-        bool subscribe_local( Controller_client *client) {
-            subscribed_local_clients.push_back(client);
-            return true;
-        }
-
-        bool unsubscribe_local(Controller_client *client) {
-            subscribed_local_clients.erase(std::remove(subscribed_local_clients.begin(), subscribed_local_clients.end(), client));
-            return true;
-        }
-
-        bool remove_local_client(Controller_client *client) {
-            subscribed_local_clients.erase(std::remove(subscribed_local_clients.begin(), subscribed_local_clients.end(), client));
-            local_clients.erase(std::remove(local_clients.begin(), local_clients.end(), client));
-            delete client;
-            return true;
-        }
-
-        std::vector<Controller_client * > local_clients;
-        std::vector<Controller_client * > subscribed_local_clients;
-
-
-        void set_occlusions(cell_world::Cell_group &);
-        void join();
-
-        cell_world::Coordinates destination;
-        cell_world::Timer destination_timer;
-        bool new_destination_data;
-        std::atomic<Controller_state> state;
-        Tick_agent &agent;
-        Behavior behavior = Explore;
-        cell_world::World world;
-        cell_world::Cell_group cells;
-        cell_world::Paths paths;
-        cell_world::Map map;
-        Tick_controller_mode mode = Initialize;
-        cell_world::Location_visibility navigability;
-        Tick_controller tick_controller;
-        std::thread process;
     };
 }

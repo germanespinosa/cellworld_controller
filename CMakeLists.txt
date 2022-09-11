@@ -22,7 +22,6 @@ install_dependency(https://github.com/germanespinosa/experiment_service Experime
 
 set(controller_files
         src/pid_controller.cpp
-        src/tick_controller.cpp
         src/controller_service.cpp
         src/controller_client.cpp
         src/agent.cpp)

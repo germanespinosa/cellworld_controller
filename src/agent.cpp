@@ -18,4 +18,22 @@ namespace controller {
         update();
         return true;
     }
+
+    Tick_agent_move Tick_agent_moves::find_tick_move(cell_world::Move move, int current_orientation) {
+        Tick_agent_move tam;
+        int target_orientation = -1;
+        for (auto tm:*this){
+            if (tm.move == move) target_orientation = tm.orientation;
+        }
+        int orientation_change = (target_orientation - current_orientation + 6) % 6;
+
+        for (auto tm:*this){
+            if (orientation_change == tm.orientation) return tm;
+        }
+        return Tick_agent_move();
+    }
+
+    int Tick_agent_move::update_orientation(int current_orientation) {
+        return (current_orientation + orientation ) % 6;
+    }
 }

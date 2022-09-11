@@ -26,6 +26,26 @@ namespace controller {
         virtual bool stop();
     };
 
+    struct Tick_agent_move : json_cpp::Json_object {
+        Json_object_members(
+                Add_member(move);
+                Add_member(orientation);
+                Add_member(left_ticks);
+                Add_member(right_ticks);
+                Add_member(speed);
+        )
+        cell_world::Move move;
+        int orientation;
+        int left_ticks;
+        int right_ticks;
+        int speed;
+        int update_orientation(int current_orientation);
+    };
+
+    struct Tick_agent_moves : json_cpp::Json_vector<Tick_agent_move>{
+        Tick_agent_move find_tick_move(cell_world::Move move, int current_orientation);
+    };
+
     struct Tick_agent {
         virtual bool is_ready() = 0;
         virtual void execute_move(cell_world::Move) = 0;
