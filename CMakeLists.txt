@@ -10,11 +10,22 @@ project( controller
 find_package(Dependencies)
 
 string(APPEND CMAKE_CXX_FLAGS " -pthread ")
-install_dependency(https://github.com/germanespinosa/cellworld Cellworld)
-install_dependency(https://github.com/germanespinosa/easy-tcp Easy-tcp)
-install_dependency(https://github.com/germanespinosa/tcp-messages Tcp_messages)
-install_dependency(https://github.com/germanespinosa/agent_tracking Agent_tracking)
-install_dependency(https://github.com/germanespinosa/experiment_service Experiment_service)
+install_git_dependency(Cellworld https://github.com/germanespinosa/cellworld
+        CMAKE_PROJECT
+        IMPORT_TARGETS cellworld json-cpp)
+install_git_dependency(Easy-tcp https://github.com/germanespinosa/easy-tcp
+        CMAKE_PROJECT
+        IMPORT_TARGETS easy-tcp)
+install_git_dependency(Tcp_messages https://github.com/germanespinosa/tcp-messages
+        CMAKE_PROJECT
+        IMPORT_TARGETS tcp_messages)
+install_git_dependency(Agent_tracking https://github.com/germanespinosa/agent_tracking
+        CMAKE_PROJECT
+        IMPORT_TARGETS agent_tracking)
+install_git_dependency(Experiment_service https://github.com/germanespinosa/experiment_service
+        CMAKE_PROJECT
+        IMPORT_TARGETS experiment_service)
+
 
 ###
 ### MAIN LIBRARY SETUP
@@ -40,11 +51,7 @@ target_include_directories(controller
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
-dependency_include(include)
-
-target_include_directories(controller
-        PRIVATE
-        include )
+include_directories(include)
 
 target_link_libraries( controller
         LINK_PUBLIC
