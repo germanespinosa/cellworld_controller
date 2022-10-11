@@ -55,7 +55,7 @@ namespace controller {
 
 
     Controller_server::Controller_server(const string &pid_config_file_path,
-                                         Agent &agent,
+                                         Tick_agent &agent,
                                          Controller_tracking_client &tracking_client,
                                          Controller_experiment_client &experiment_client):
             agent(agent),
@@ -79,33 +79,27 @@ namespace controller {
 
     void Controller_server::controller_process() {                      // setting robot velocity
         state = Controller_state::Playing;
-        Pid_inputs pi;
+        int i;
         while(state != Controller_state::Stopped){
             robot_mtx.lock();
             if (this->tracking_client.capture.cool_down.time_out()){
+            // TODO: add pause and tracking safety feature back in
             // if there is no information from the tracker
-                if (!tracking_client.agent.is_valid() ||
-                    state == Controller_state::Paused ||
-                    destination_timer.time_out()){
-                    agent.set_left(0);
-                    agent.set_right(0);
-                    agent.update();
-                } else {
-                    //PID controller
-                    pi.location = tracking_client.agent.step.location;
-                    pi.rotation = tracking_client.agent.step.rotation;
-                    pi.destination = get_next_stop();
-                    auto dist = destination.dist(pi.location);
-                    if (dist < world.cell_transformation.size / 2) {
-                        agent.set_left(0);
-                        agent.set_right(0);
-                        agent.update();
-                    } else {
-                        auto robot_command = pid_controller.process(pi, behavior);
-                        agent.set_left(robot_command.left);
-                        agent.set_right(robot_command.right);
-                        agent.update();
-                    }
+//                if (!tracking_client.agent.is_valid() ||
+//                    state == Controller_state::Paused ||
+//                    destination_timer.time_out()){
+//                    i = 0;
+//                } else {
+//                    // TODO: figure out best time to send new move to robot
+//                    cout << "PROCESS" << endl;
+//
+//                    cout << agent.current_coordinates << endl;
+//                }
+                i = 5;
+                // TODO: should I check this think about it
+                if (agent.is_ready()){
+                    auto next_move = get_next_move();
+                    if (next_move != Move(0,0)) agent.execute_move(next_move);
                 }
             }
             robot_mtx.unlock();
@@ -122,40 +116,26 @@ namespace controller {
         return true;
     }
 
-#define goal_weight 0
-#define occlusion_weight 0.0001 //was 0.0001
-#define decay 2
+    // This function returns next move based on current coordinate of the robot wrt the current destination
+    cell_world::Move Controller_server::get_next_move() {
+        cout << "CURRENT COORDINATE: " << agent.current_coordinates << endl;
 
-    cell_world::Location Controller_server::get_next_stop() {
-        auto agent_location = tracking_client.agent.step.location;
-        if (navigability.is_visible(agent_location, destination)) {
-            return destination;
-        }
-        auto destination_cell_index = cells.find(destination);
-        auto next_stop_test = cells.find(agent_location);
-        auto next_stop = next_stop_test;
-        while (navigability.is_visible(agent_location, cells[next_stop_test].location)){
-            next_stop = next_stop_test;
-            auto move = paths.get_move(cells[next_stop], cells[destination_cell_index]);
-            if (move == Move{0,0}) break;
-            next_stop_test = cells.find(map[cells[next_stop].coordinates + move]);
+        auto agent_cell_index = cells.find(agent.current_coordinates); // current robot location
+        auto destination_cell_index = cells.find(destination); // destination
+
+        if (destination == Location(0,0)){
+            cout << "invalid destination stay here" << endl;
+            destination_cell_index = agent_cell_index;
         }
 
-        auto total_gravity_change = Location(0,0);
-        for (auto &cell_r : cells.occluded_cells()) {
-            Cell cell = cell_r.get();
-            auto distance = cell.location.dist(agent_location);
-            auto theta = cell.location.atan(agent_location);
-            auto gravity = occlusion_weight / pow(distance,decay);
-            total_gravity_change = total_gravity_change.move(theta, gravity);
-        }
-        auto distance = cells[next_stop].location.dist(agent_location);
-        auto theta = agent_location.atan(cells[next_stop].location);
-        auto gravity = goal_weight / pow(distance,decay);
-        total_gravity_change = total_gravity_change.move(theta, gravity);
-
-        return cells[next_stop].location + total_gravity_change;
+        auto move = paths.get_move(cells[agent_cell_index], cells[destination_cell_index]);  // returns next move
+        cout << "MOVE" << move << endl;
+        return move;
     }
+
+
+
+
 
     bool Controller_server::pause() {
         if (state == Controller_state::Playing) {
@@ -218,14 +198,15 @@ namespace controller {
                 robot_mtx.lock();
                     auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
                     if (is_captured) {
-                        controller_server->agent.set_left(0);
-                        controller_server->agent.set_right(0);
-                        controller_server->agent.capture();
-                        controller_server->agent.update();
-                        controller_server->agent.capture();
-                        controller_server->agent.update();
-                        controller_server->agent.update();
-                        controller_server->send_capture(step.frame);
+                        cout << "capture" << endl;
+//                        controller_server->agent.set_left(0);
+//                        controller_server->agent.set_right(0);
+//                        controller_server->agent.capture();
+//                        controller_server->agent.update();
+//                        controller_server->agent.capture();
+//                        controller_server->agent.update();
+//                        controller_server->agent.update();
+//                        controller_server->send_capture(step.frame);
                     }
                 robot_mtx.unlock();
                 if (visibility.is_visible(predator.location, step.location) &&

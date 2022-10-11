@@ -90,13 +90,13 @@ namespace controller {
         } &tracking_client;
 
         Controller_server(const std::string &pid_config_file_path,
-                          Agent &,
+                          Tick_agent &,
                           Controller_tracking_client &,
                           Controller_experiment_client &);
 
 
         void controller_process();
-        cell_world::Location get_next_stop();
+        cell_world::Move get_next_move();
 
         template< typename T, typename... Ts>
         T &create_local_client(Ts... vs){
@@ -134,7 +134,7 @@ namespace controller {
         cell_world::Timer destination_timer;
         bool new_destination_data;
         std::atomic<Controller_state> state;
-        Agent &agent;
+        Tick_agent &agent;
         Behavior behavior = Explore;
         cell_world::World world;
         cell_world::Cell_group cells;
