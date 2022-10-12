@@ -85,21 +85,18 @@ namespace controller {
             if (this->tracking_client.capture.cool_down.time_out()){
             // TODO: add pause and tracking safety feature back in
             // if there is no information from the tracker
-//                if (!tracking_client.agent.is_valid() ||
-//                    state == Controller_state::Paused ||
-//                    destination_timer.time_out()){
-//                    i = 0;
-//                } else {
-//                    // TODO: figure out best time to send new move to robot
-//                    cout << "PROCESS" << endl;
-//
-//                    cout << agent.current_coordinates << endl;
-//                }
-                i = 5;
-                // TODO: should I check this think about it
-                if (agent.is_ready()){
-                    auto next_move = get_next_move();
-                    if (next_move != Move(0,0)) agent.execute_move(next_move);
+                if (!tracking_client.agent.is_valid() ||
+                    state == Controller_state::Paused ||
+                    destination_timer.time_out()){
+                    // reset move count
+                    // send 0 to robot (maybe use -#)
+                    i = 0;
+                } else {
+                    // TODO: figure out best time to send new move to robot
+                    if (agent.is_ready()){
+                        auto next_move = get_next_move();
+                        if (next_move != Move(0,0)) agent.execute_move(next_move);
+                    }
                 }
             }
             robot_mtx.unlock();
