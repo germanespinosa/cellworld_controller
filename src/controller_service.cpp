@@ -78,6 +78,9 @@ namespace controller {
     }
 
     void Controller_server::controller_process() {                      // setting robot velocity
+        // reset tick count on  robot
+        agent.move_count_reset();
+
         state = Controller_state::Playing;
         int i;
         while(state != Controller_state::Stopped){
@@ -85,18 +88,22 @@ namespace controller {
             if (this->tracking_client.capture.cool_down.time_out()){
             // TODO: add pause and tracking safety feature back in
             // if there is no information from the tracker
-                if (!tracking_client.agent.is_valid() ||
-                    state == Controller_state::Paused ||
-                    destination_timer.time_out()){
-                    // reset move count
-                    // send 0 to robot (maybe use -#)
-                    i = 0;
-                } else {
-                    // TODO: figure out best time to send new move to robot
-                    if (agent.is_ready()){
-                        auto next_move = get_next_move();
-                        if (next_move != Move(0,0)) agent.execute_move(next_move);
-                    }
+//                if (!tracking_client.agent.is_valid() ||
+//                    state == Controller_state::Paused ||
+//                    destination_timer.time_out()){
+//                    // reset move count
+//                    // send 0 to robot (maybe use -#)
+//                    i = 0;
+//                } else {
+//                    // TODO: figure out best time to send new move to robot
+//                    if (agent.is_ready()){
+//                        auto next_move = get_next_move();
+//                        if (next_move != Move(0,0)) agent.execute_move(next_move);
+//                    }
+//                }
+                if (agent.is_ready()){
+                    auto next_move = get_next_move();
+                    if (next_move != Move(0,0)) agent.execute_move(next_move);
                 }
             }
             robot_mtx.unlock();
@@ -106,7 +113,7 @@ namespace controller {
     }
 
     bool Controller_server::set_destination(const cell_world::Location &new_destination) {
-        cout << "New destination: " << new_destination << endl;
+//        cout << "New destination: " << new_destination << endl;
         destination = new_destination;
         destination_timer = Timer(5);
         new_destination_data = true;
@@ -115,18 +122,18 @@ namespace controller {
 
     // This function returns next move based on current coordinate of the robot wrt the current destination
     cell_world::Move Controller_server::get_next_move() {
-        cout << "CURRENT COORDINATE: " << agent.current_coordinates << endl;
+//        cout << "CURRENT COORDINATE: " << agent.current_coordinates << endl;
 
         auto agent_cell_index = cells.find(agent.current_coordinates); // current robot location
         auto destination_cell_index = cells.find(destination); // destination
 
         if (destination == Location(0,0)){
-            cout << "invalid destination stay here" << endl;
+//            cout << "invalid destination stay here" << endl;
             destination_cell_index = agent_cell_index;
         }
 
         auto move = paths.get_move(cells[agent_cell_index], cells[destination_cell_index]);  // returns next move
-        cout << "MOVE" << move << endl;
+//        cout << "MOVE" << move << endl;
         return move;
     }
 
