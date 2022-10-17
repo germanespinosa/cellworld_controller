@@ -1,5 +1,5 @@
 def __module_version__():
-	return 0, 0, 11 
+	return 0, 0, 18 
 
 
 def __module_name__():
@@ -60,5 +60,9 @@ def __root_folder__():
 
 def __description__():
 	return 'Controller client' 
+
+
+def __package_data__():
+	return {} 
 
 

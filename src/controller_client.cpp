@@ -52,4 +52,12 @@ namespace controller {
         }
     }
 
+    bool Controller_client::set_rotation(float rotation) {
+        if (local_server)
+        {
+            return local_server->set_rotation(rotation);
+        }else {
+            return send_request(Message("set_rotation", rotation)).get_body<bool>();
+        }
+    }
 }

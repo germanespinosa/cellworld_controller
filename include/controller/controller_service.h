@@ -19,6 +19,7 @@ namespace controller {
     struct Controller_service : tcp_messages::Message_service {
         Routes (
             Add_route_with_response("set_destination", set_destination, cell_world::Location);
+            Add_route_with_response("set_rotation", set_rotation, float);
             Add_route_with_response("stop", stop_controller);
             Add_route_with_response("pause", pause_controller);
             Add_route_with_response("resume", resume_controller);
@@ -27,6 +28,7 @@ namespace controller {
         );
 
         bool set_destination(const cell_world::Location &);
+        bool set_rotation(float);
         bool stop_controller();
         bool pause_controller();
         bool resume_controller();
@@ -58,6 +60,7 @@ namespace controller {
         bool resume();
         void set_occlusions(const std::string &occlusions, float margin = .45);
         bool set_behavior(int behavior);
+        bool set_rotation(float rotation);
         void join();
 
         struct Controller_experiment_client : experiment::Experiment_client {

@@ -50,7 +50,9 @@ namespace controller {
         virtual bool is_ready() = 0;
         virtual void execute_move(cell_world::Move) = 0;
         virtual void move_count_reset() = 0;
+        virtual void set_rotation(float){};
         cell_world::Coordinates current_coordinates;
         cell_world::Timer timer;
+
     };
 }

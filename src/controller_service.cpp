@@ -276,5 +276,14 @@ namespace controller {
 
     Controller_server::Controller_experiment_client::Controller_experiment_client() {
     }
+
+    bool Controller_service::set_rotation(float rotation) {
+        return ((Controller_server *) _server)->set_rotation(rotation);
+    }
+
+    bool Controller_server::set_rotation(float rotation) {
+        agent.set_rotation(rotation);
+        return true;
+    }
 }
 
