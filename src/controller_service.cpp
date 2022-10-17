@@ -113,7 +113,6 @@ namespace controller {
     }
 
     bool Controller_server::set_destination(const cell_world::Location &new_destination) {
-//        cout << "New destination: " << new_destination << endl;
         destination = new_destination;
         destination_timer = Timer(5);
         new_destination_data = true;
@@ -122,18 +121,14 @@ namespace controller {
 
     // This function returns next move based on current coordinate of the robot wrt the current destination
     cell_world::Move Controller_server::get_next_move() {
-//        cout << "CURRENT COORDINATE: " << agent.current_coordinates << endl;
 
-        auto agent_cell_index = cells.find(agent.current_coordinates); // current robot location
+        auto agent_cell_index = cells.find(agent.current_coordinates); // current robot coordinates
         auto destination_cell_index = cells.find(destination); // destination
 
         if (destination == Location(0,0)){
-//            cout << "invalid destination stay here" << endl;
             destination_cell_index = agent_cell_index;
         }
-
         auto move = paths.get_move(cells[agent_cell_index], cells[destination_cell_index]);  // returns next move
-//        cout << "MOVE" << move << endl;
         return move;
     }
 
