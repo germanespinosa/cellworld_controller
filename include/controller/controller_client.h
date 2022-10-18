@@ -27,6 +27,7 @@ namespace controller{
         bool set_destination(const cell_world::Location &);
         bool set_behavior(Behavior);
         bool set_rotation(float);
+        bool set_coordinate(cell_world::Coordinates);
         Controller_server *local_server = nullptr;
         virtual ~Controller_client();
     };

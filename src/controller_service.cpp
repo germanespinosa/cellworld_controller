@@ -285,5 +285,14 @@ namespace controller {
         agent.set_rotation(rotation);
         return true;
     }
+
+    bool Controller_service::set_coordinate(cell_world::Coordinates coordinate) {
+        return ((Controller_server *) _server)->set_coordinate(coordinate);
+    }
+
+    bool Controller_server::set_coordinate(cell_world::Coordinates coordinate) {
+        agent.set_coordinate(coordinate);
+        return true;
+    }
 }
 

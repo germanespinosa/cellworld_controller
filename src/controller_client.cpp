@@ -60,4 +60,13 @@ namespace controller {
             return send_request(Message("set_rotation", rotation)).get_body<bool>();
         }
     }
+
+    bool Controller_client::set_coordinate(cell_world::Coordinates coordinate) {
+        if (local_server)
+        {
+            return local_server->set_coordinate(coordinate);
+        }else {
+            return send_request(Message("set_coordinate", coordinate)).get_body<bool>();
+        }
+    }
 }
