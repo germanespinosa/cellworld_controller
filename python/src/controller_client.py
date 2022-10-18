@@ -36,5 +36,8 @@ class ControllerClient(MessageClient):
     def set_rotation(self, rotation: float) -> bool:
         return self.send_request(Message("set_rotation", rotation), 10000).get_body(bool)
 
+    def set_coordinate(self, coordinate: Coordinates) -> bool:
+        return self.send_request(Message("set_coordinate", coordinate), 10000).get_body(bool)
+
     def set_behavior(self, behavior: int) -> bool:
         return self.send_request(Message("set_behavior", behavior)).get_body(bool)
