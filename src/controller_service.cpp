@@ -53,21 +53,21 @@ namespace controller {
     }
 
 
-
     Controller_server::Controller_server(const string &pid_config_file_path,
                                          Tick_agent &agent,
                                          Controller_tracking_client &tracking_client,
                                          Controller_experiment_client &experiment_client):
             agent(agent),
-            world(World::get_from_parameters_name("hexagonal", "canonical")),
+            world(World::get_from_parameters_name("robot", "canonical")),
             cells(world.create_cell_group()),
-            paths(world.create_paths(Resources::from("paths").key("hexagonal").key("00_00").key("astar").get_resource<Path_builder>())),
+            paths(world.create_paths(Resources::from("paths").key("robot").key("21_05").key("astar").get_resource<Path_builder>())),
             map(cells),
             navigability(cells, world.cell_shape,Transformation(world.cell_transformation.size, world.cell_transformation.rotation)),
             pid_controller (Json_from_file<Pid_parameters>(pid_config_file_path)),
             tracking_client(tracking_client),
             destination_timer(0),
             experiment_client(experiment_client)
+            // TODO: might want to change default paths and world to robot ... we will see
     {
         tracking_client.controller_server = this;
         experiment_client.controller_server = this;
@@ -88,23 +88,23 @@ namespace controller {
             if (this->tracking_client.capture.cool_down.time_out()){
             // TODO: add pause and tracking safety feature back in
             // if there is no information from the tracker
-//                if (!tracking_client.agent.is_valid() ||
-//                    state == Controller_state::Paused ||
-//                    destination_timer.time_out()){
-//                    // reset move count
-//                    // send 0 to robot (maybe use -#)
-//                    i = 0;
-//                } else {
-//                    // TODO: figure out best time to send new move to robot
-//                    if (agent.is_ready()){
-//                        auto next_move = get_next_move();
-//                        if (next_move != Move(0,0)) agent.execute_move(next_move);
-//                    }
-//                }
-                if (agent.is_ready()){
-                    auto next_move = get_next_move();
-                    if (next_move != Move(0,0)) agent.execute_move(next_move);
+                if (!tracking_client.agent.is_valid() ||
+                    state == Controller_state::Paused ||
+                    destination_timer.time_out()){
+                    // reset move count
+                    // send 0 to robot (maybe use -#)
+                    i = 0;
+                } else {
+                    // TODO: figure out best time to send new move to robot
+                    if (agent.is_ready()){
+                        auto next_move = get_next_move();
+                        if (next_move != Move(0,0)) agent.execute_move(next_move);
+                    }
                 }
+//                if (agent.is_ready()){
+//                    auto next_move = get_next_move();
+//                    if (next_move != Move(0,0)) agent.execute_move(next_move);
+//                }
             }
             robot_mtx.unlock();
             //prevents overflowing the robot ( max 10 commands per second)
@@ -114,6 +114,7 @@ namespace controller {
 
     bool Controller_server::set_destination(const cell_world::Location &new_destination) {
         destination = new_destination;
+//        cout << "new destination: " << destination << endl;
         destination_timer = Timer(5);
         new_destination_data = true;
         return true;
@@ -153,10 +154,11 @@ namespace controller {
     }
 
     void Controller_server::set_occlusions(const std::string &occlusions, float margin) {
-        auto occlusions_cgb = Resources::from("cell_group").key("hexagonal").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
+        // TODO: change world that is loaded hexagonal -> robot
+        auto occlusions_cgb = Resources::from("cell_group").key("robot").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
         world.set_occlusions(occlusions_cgb);
         cells = world.create_cell_group();
-        paths = Paths(world.create_paths(Resources::from("paths").key("hexagonal").key(occlusions).key("astar").key("robot").get_resource<Path_builder>()));
+        paths = Paths(world.create_paths(Resources::from("paths").key("robot").key(occlusions).key("astar").get_resource<Path_builder>()));
         navigability = Location_visibility(cells, world.cell_shape,Transformation(world.cell_transformation.size * (1 + margin), world.cell_transformation.rotation)); // robot size
         tracking_client.visibility.update_occlusions(cells);
     }
