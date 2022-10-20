@@ -101,12 +101,15 @@ namespace controller {
                         if (next_move != Move(0,0)) agent.execute_move(next_move);
                     }
                 }
-//                if (agent.is_ready()){
-//                    auto next_move = get_next_move();
-//                    if (next_move != Move(0,0)) agent.execute_move(next_move);
-//                }
+            }
+            if (agent.needs_correction()) {
+                agent.correct_robot();
             }
             robot_mtx.unlock();
+            // check the error...
+            //pause
+            //correct
+            //resume
             //prevents overflowing the robot ( max 10 commands per second)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }

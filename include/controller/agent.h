@@ -52,6 +52,8 @@ namespace controller {
         virtual void move_count_reset() = 0;
         virtual void set_rotation(float){};
         virtual void set_coordinate(cell_world::Coordinates){};
+        virtual bool needs_correction(){return false;};
+        virtual void correct_robot(){};
         cell_world::Coordinates current_coordinates;
         cell_world::Timer timer;
 
