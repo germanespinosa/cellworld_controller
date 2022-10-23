@@ -102,6 +102,11 @@ namespace controller {
                     }
                 }
             }
+            // check if joystick is on each loop
+            if (agent.use_joystick()) {
+                agent.joystick_control();
+            }
+            // check if needs correction due to high error or joystick use
             if (agent.needs_correction()) {
                 agent.correct_robot();
             }

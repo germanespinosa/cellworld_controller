@@ -53,7 +53,9 @@ namespace controller {
         virtual void set_rotation(float){};
         virtual void set_coordinate(cell_world::Coordinates){};
         virtual bool needs_correction(){return false;};
+        virtual bool use_joystick(){return false;};
         virtual void correct_robot(){};
+        virtual void joystick_control(){};
         cell_world::Coordinates current_coordinates;
         cell_world::Timer timer;
 
