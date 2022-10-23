@@ -56,6 +56,7 @@ namespace controller {
         virtual bool use_joystick(){return false;};
         virtual void correct_robot(){};
         virtual void joystick_control(){};
+        virtual void capture(){};
         cell_world::Coordinates current_coordinates;
         cell_world::Timer timer;
 

@@ -91,8 +91,7 @@ namespace controller {
                 if (!tracking_client.agent.is_valid() ||
                     state == Controller_state::Paused ||
                     destination_timer.time_out()){
-                    // reset move count
-                    // send 0 to robot (maybe use -#)
+//                    cout << "PAUSE ROBOT" << endl;
                     i = 0;
                 } else {
                     // TODO: figure out best time to send new move to robot
@@ -208,14 +207,8 @@ namespace controller {
                     auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
                     if (is_captured) {
                         cout << "capture" << endl;
-//                        controller_server->agent.set_left(0);
-//                        controller_server->agent.set_right(0);
-//                        controller_server->agent.capture();
-//                        controller_server->agent.update();
-//                        controller_server->agent.capture();
-//                        controller_server->agent.update();
-//                        controller_server->agent.update();
-//                        controller_server->send_capture(step.frame);
+                        controller_server->agent.capture();
+                        controller_server->agent.capture();
                     }
                 robot_mtx.unlock();
                 if (visibility.is_visible(predator.location, step.location) &&
