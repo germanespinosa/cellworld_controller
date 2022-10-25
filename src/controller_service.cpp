@@ -94,8 +94,8 @@ namespace controller {
                     i = 0;
                 } else {
                     if (agent.is_ready()){
-                        auto next_move = get_next_move();
-                        if (next_move != Move(0,0)) agent.execute_move(next_move);
+                        auto next_moves = get_next_moves();
+                        if (!next_moves.empty()) agent.execute_move(next_moves);
                     }
                 }
             }
@@ -122,22 +122,65 @@ namespace controller {
         return true;
     }
 
-    // This function returns next move based on current coordinate of the robot wrt the current destination
-    cell_world::Move Controller_server::get_next_move() {
+    cell_world::Cell_group Controller_server::get_possible_next_cells(const cell_world::Cell &cell){
 
-        auto agent_cell_index = cells.find(agent.current_coordinates); // current robot coordinates
-        auto destination_cell_index = cells.find(destination); // destination
+        cell_world::Cell_group possible_moves;
 
-        if (destination == Location(0,0)){
-            destination_cell_index = agent_cell_index;
+        auto candidates = world.connection_pattern.get_candidates(cell.coordinates);
+
+        auto prev_move = world.connection_pattern.back();
+        auto prev_candidate = candidates.back();
+        bool prev_valid = map.find(prev_candidate) != Not_found && !map[prev_candidate].occluded;
+
+        for (unsigned int i=0; i < candidates.size();i++){
+            auto curr_move = world.connection_pattern[i];
+            auto curr_candidate = candidates[i];
+            bool curr_valid = map.find(curr_candidate) != Not_found && !map[curr_candidate].occluded;
+            if (curr_valid) {
+                possible_moves.add(map[curr_candidate]);
+                if (prev_valid) {
+                    //test double moves
+                    auto double_move = curr_move + prev_move;
+                    auto double_candidate = cell.coordinates + double_move;
+                    bool double_valid = map.find(double_candidate) != Not_found && !map[double_candidate].occluded;
+                    if (double_valid) possible_moves.add(map[double_candidate]);
+                }
+            }
+            prev_move = curr_move;
+            prev_candidate = curr_candidate;
+            prev_valid = curr_valid;
         }
-        auto move = paths.get_move(cells[agent_cell_index], cells[destination_cell_index]);  // returns next move
-        return move;
+        return possible_moves;
     }
 
+    // This function returns next move based on current coordinate of the robot wrt the current destination
+    cell_world::Move_list Controller_server::get_next_moves() {
+        auto agent_cell_index = cells.find(agent.current_coordinates); // current robot coordinates
+        auto &agent_cell = cells[agent_cell_index];
 
+        auto destination_cell_index = cells.find(destination); // destination
+        auto &destination_cell = cells[destination_cell_index];
 
-
+        Move_list moves;
+        if (agent_cell != destination_cell) {
+            auto possible_moves = get_possible_next_cells(cells[agent_cell_index]);
+            int min_distance = -1;
+            for (auto &possible_move: possible_moves) {
+                auto step_count = paths.get_steps(possible_move, destination_cell);
+                if (min_distance == -1 || min_distance > step_count) {
+                    min_distance = step_count;
+                }
+            }
+            for (auto &possible_move: possible_moves) {
+                auto step_count = paths.get_steps(possible_move, destination_cell);
+                if (step_count == min_distance) {
+                    auto move = possible_move.get().coordinates - agent.current_coordinates;
+                    moves.push_back(move);
+                }
+            }
+        }
+        return moves;
+    }
 
     bool Controller_server::pause() {
         if (state == Controller_state::Playing) {

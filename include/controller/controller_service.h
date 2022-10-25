@@ -102,7 +102,9 @@ namespace controller {
 
 
         void controller_process();
-        cell_world::Move get_next_move();
+        cell_world::Cell_group get_possible_next_cells(const cell_world::Cell &cell);
+
+        cell_world::Move_list get_next_moves();
 
         template< typename T, typename... Ts>
         T &create_local_client(Ts... vs){

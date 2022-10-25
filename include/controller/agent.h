@@ -42,13 +42,21 @@ namespace controller {
         int update_orientation(int current_orientation);
     };
 
-    struct Tick_agent_moves : json_cpp::Json_vector<Tick_agent_move>{
+    struct Tick_agent_moves : json_cpp::Json_object {
+        Json_object_members(
+                Add_member(turning_moves);
+                Add_member(forward_moves);
+                )
         Tick_agent_move find_tick_move(cell_world::Move move, int current_orientation);
+        Tick_agent_move get_forward_move(int current_orientation);
+
+        json_cpp::Json_vector<Tick_agent_move> turning_moves;
+        json_cpp::Json_vector<Tick_agent_move> forward_moves;
     };
 
     struct Tick_agent {
         virtual bool is_ready() = 0;
-        virtual void execute_move(cell_world::Move) = 0;
+        virtual void execute_move(cell_world::Move_list) = 0;
         virtual void move_count_reset() = 0;
         virtual void set_rotation(float){};
         virtual void set_coordinate(cell_world::Coordinates){};
