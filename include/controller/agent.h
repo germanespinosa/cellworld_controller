@@ -52,9 +52,9 @@ namespace controller {
         virtual void move_count_reset() = 0;
         virtual void set_rotation(float){};
         virtual void set_coordinate(cell_world::Coordinates){};
+        virtual void correct_robot(){};
         virtual bool needs_correction(){return false;};
         virtual bool use_joystick(){return false;};
-        virtual void correct_robot(){};
         virtual void joystick_control(){};
         virtual void capture(){};
         cell_world::Coordinates current_coordinates;

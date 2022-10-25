@@ -86,7 +86,6 @@ namespace controller {
         while(state != Controller_state::Stopped){
             robot_mtx.lock();
             if (this->tracking_client.capture.cool_down.time_out()){
-            // TODO: add pause and tracking safety feature back in
             // if there is no information from the tracker
                 if (!tracking_client.agent.is_valid() ||
                     state == Controller_state::Paused ||
@@ -94,7 +93,6 @@ namespace controller {
 //                    cout << "PAUSE ROBOT" << endl;
                     i = 0;
                 } else {
-                    // TODO: figure out best time to send new move to robot
                     if (agent.is_ready()){
                         auto next_move = get_next_move();
                         if (next_move != Move(0,0)) agent.execute_move(next_move);
@@ -109,11 +107,8 @@ namespace controller {
             if (agent.needs_correction()) {
                 agent.correct_robot();
             }
+
             robot_mtx.unlock();
-            // check the error...
-            //pause
-            //correct
-            //resume
             //prevents overflowing the robot ( max 10 commands per second)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
@@ -206,7 +201,6 @@ namespace controller {
                 robot_mtx.lock();
                     auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
                     if (is_captured) {
-                        cout << "capture" << endl;
                         controller_server->agent.capture();
                         controller_server->agent.capture();
                     }
@@ -297,5 +291,6 @@ namespace controller {
         agent.set_coordinate(coordinate);
         return true;
     }
+
 }
 
