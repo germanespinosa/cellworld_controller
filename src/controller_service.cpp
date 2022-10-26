@@ -79,7 +79,7 @@ namespace controller {
 
     void Controller_server::controller_process() {                      // setting robot velocity
         // reset tick count on  robot
-        agent.move_count_reset();
+//        agent.move_count_reset();
 
         state = Controller_state::Playing;
         int i;
@@ -90,7 +90,7 @@ namespace controller {
                 if (!tracking_client.agent.is_valid() ||
                     state == Controller_state::Paused ||
                     destination_timer.time_out()){
-//                    cout << "PAUSE ROBOT" << endl;
+    //                    cout << "PAUSE ROBOT" << endl;
                     i = 0;
                 } else {
                     if (agent.is_ready()){
@@ -98,15 +98,19 @@ namespace controller {
                         if (!next_moves.empty()) agent.execute_move(next_moves);
                     }
                 }
+                // check if needs correction due to high error or joystick use
+                if (agent.needs_correction()) {
+                    agent.correct_robot();
+                }
             }
             // check if joystick is on each loop
             if (agent.use_joystick()) {
                 agent.joystick_control();
             }
-            // check if needs correction due to high error or joystick use
-            if (agent.needs_correction()) {
-                agent.correct_robot();
-            }
+//            // check if needs correction due to high error or joystick use
+//            if (agent.needs_correction()) {
+//                agent.correct_robot();
+//            }
 
             robot_mtx.unlock();
             //prevents overflowing the robot ( max 10 commands per second)
@@ -244,9 +248,9 @@ namespace controller {
                 robot_mtx.lock();
                     auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
                     if (is_captured) {
+                        cout << "capture" << endl;
                         controller_server->agent.capture();
-                        controller_server->agent.capture();
-                    }
+                    } // triggering it here creates all sorts of events... cmalybe this should be in the embedded?
                 robot_mtx.unlock();
                 if (visibility.is_visible(predator.location, step.location) &&
                         to_degrees(angle_difference(predator.location.atan(step.location), to_radians(predator.rotation))) < view_angle / 2) {
@@ -311,6 +315,7 @@ namespace controller {
         experiment::Start_experiment_response experiment;
         experiment.load(get_experiment_file(experiment_name));
         controller_server->set_occlusions(experiment.world.occlusions);
+        controller_server->tracking_client.capture.visibility = Location_visibility(controller_server->cells, controller_server->world.cell_shape, controller_server->world.cell_transformation);
         Experiment_client::on_episode_started(experiment_name);
     }
 

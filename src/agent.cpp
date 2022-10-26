@@ -25,7 +25,6 @@ namespace controller {
         for (auto tm:turning_moves){
             if (tm.move == move) target_orientation = tm.orientation;
         }
-        cout << "target: " << target_orientation << " current: " << current_orientation << endl;
         int orientation_change = (target_orientation - current_orientation + 12) % 12;
 
         for (auto tm:turning_moves){
