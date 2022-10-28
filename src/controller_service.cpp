@@ -58,11 +58,10 @@ namespace controller {
                                          Controller_tracking_client &tracking_client,
                                          Controller_experiment_client &experiment_client):
             agent(agent),
-            world(World::get_from_parameters_name("robot", "canonical")),
+            world(World::get_from_parameters_name("robot", "canonical", "21_05")),
             cells(world.create_cell_group()),
             paths(world.create_paths(Resources::from("paths").key("robot").key("21_05").key("astar").get_resource<Path_builder>())),
             map(cells),
-            navigability(cells, world.cell_shape,Transformation(world.cell_transformation.size, world.cell_transformation.rotation)),
             pid_controller (Json_from_file<Pid_parameters>(pid_config_file_path)),
             tracking_client(tracking_client),
             destination_timer(0),
@@ -80,7 +79,6 @@ namespace controller {
     void Controller_server::controller_process() {                      // setting robot velocity
         // reset tick count on  robot
 //        agent.move_count_reset();
-
         state = Controller_state::Playing;
         int i;
         while(state != Controller_state::Stopped){
@@ -105,7 +103,9 @@ namespace controller {
             }
             // check if joystick is on each loop
             if (agent.use_joystick()) {
+                experiment_client.human_intervention(true);
                 agent.joystick_control();
+                experiment_client.human_intervention(false);
             }
 //            // check if needs correction due to high error or joystick use
 //            if (agent.needs_correction()) {
@@ -204,12 +204,11 @@ namespace controller {
 
     void Controller_server::set_occlusions(const std::string &occlusions, float margin) {
         // TODO: change world that is loaded hexagonal -> robot
-        auto occlusions_cgb = Resources::from("cell_group").key("robot").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
-        world.set_occlusions(occlusions_cgb);
-        cells = world.create_cell_group();
-        paths = Paths(world.create_paths(Resources::from("paths").key("robot").key(occlusions).key("astar").get_resource<Path_builder>()));
-        navigability = Location_visibility(cells, world.cell_shape,Transformation(world.cell_transformation.size * (1 + margin), world.cell_transformation.rotation)); // robot size
-        tracking_client.visibility.update_occlusions(cells);
+        //auto occlusions_cgb = Resources::from("cell_group").key("robot").key(occlusions).key("occlusions").get_resource<Cell_group_builder>();
+        //world.set_occlusions(occlusions_cgb);
+        //cells = world.create_cell_group();
+        //paths = Paths(world.create_paths(Resources::from("paths").key("robot").key(occlusions).key("astar").get_resource<Path_builder>()));
+        //tracking_client.visibility.update_occlusions(cells);
     }
 
     void Controller_server::join() {
@@ -228,7 +227,6 @@ namespace controller {
     }
 
     void Controller_server::set_occlusions(Cell_group &cells) {
-        navigability.update_occlusions(cells);
     }
 
     void Controller_server::Controller_tracking_client::on_step(const Step &step) {
@@ -296,9 +294,9 @@ namespace controller {
     }
 
     void Controller_server::Controller_tracking_client::set_occlusions(Cell_group &cells) {
-        visibility.update_occlusions(cells);
-        capture.visibility.update_occlusions(cells);
-        peeking.peeking_visibility.update_occlusions(cells);
+//        visibility.update_occlusions(cells);
+//        capture.visibility.update_occlusions(cells);
+//        peeking.peeking_visibility.update_occlusions(cells);
     }
 
     string get_experiment_file(const string &experiment_name){
@@ -314,8 +312,8 @@ namespace controller {
     void Controller_server::Controller_experiment_client::on_episode_started(const string &experiment_name) {
         experiment::Start_experiment_response experiment;
         experiment.load(get_experiment_file(experiment_name));
-        controller_server->set_occlusions(experiment.world.occlusions);
-        controller_server->tracking_client.capture.visibility = Location_visibility(controller_server->cells, controller_server->world.cell_shape, controller_server->world.cell_transformation);
+        //controller_server->set_occlusions(experiment.world.occlusions);
+        //controller_server->tracking_client.capture.visibility = Location_visibility(controller_server->cells, controller_server->world.cell_shape, controller_server->world.cell_transformation);
         Experiment_client::on_episode_started(experiment_name);
     }
 

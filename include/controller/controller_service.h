@@ -150,7 +150,6 @@ namespace controller {
         cell_world::Map map;
 
 
-        cell_world::Location_visibility navigability;
         Pid_controller pid_controller;
         std::thread process;
     };
