@@ -60,6 +60,7 @@ namespace controller {
             agent(agent),
             world(World::get_from_parameters_name("robot", "canonical", "21_05")),
             cells(world.create_cell_group()),
+            free_cells(cells.free_cells()),
             paths(world.create_paths(Resources::from("paths").key("robot").key("21_05").key("astar").get_resource<Path_builder>())),
             map(cells),
             pid_controller (Json_from_file<Pid_parameters>(pid_config_file_path)),
@@ -99,6 +100,7 @@ namespace controller {
                 // check if needs correction due to high error or joystick use
                 if (agent.needs_correction()) {
                     agent.correct_robot();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 }
             }
             // check if joystick is on each loop
@@ -159,15 +161,15 @@ namespace controller {
 
     // This function returns next move based on current coordinate of the robot wrt the current destination
     cell_world::Move_list Controller_server::get_next_moves() {
-        auto agent_cell_index = cells.find(agent.current_coordinates); // current robot coordinates
-        auto &agent_cell = cells[agent_cell_index];
+        auto agent_cell_index = free_cells.find(agent.current_coordinates); // current robot coordinates //FREE CELLS ONLY, PATHS WILL FAIL IF IT IS OCCLUDED
+        auto &agent_cell = free_cells[agent_cell_index];
 
-        auto destination_cell_index = cells.find(destination); // destination
-        auto &destination_cell = cells[destination_cell_index];
+        auto destination_cell_index = free_cells.find(destination); // destination
+        auto &destination_cell = free_cells[destination_cell_index];
 
         Move_list moves;
         if (agent_cell != destination_cell) {
-            auto possible_moves = get_possible_next_cells(cells[agent_cell_index]);
+            auto possible_moves = get_possible_next_cells(agent_cell);
             int min_distance = -1;
             for (auto &possible_move: possible_moves) {
                 auto step_count = paths.get_steps(possible_move, destination_cell);

@@ -146,6 +146,7 @@ namespace controller {
         Behavior behavior = Explore;
         cell_world::World world;
         cell_world::Cell_group cells;
+        cell_world::Cell_group free_cells;
         cell_world::Paths paths;
         cell_world::Map map;
 
