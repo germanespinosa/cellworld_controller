@@ -243,7 +243,7 @@ namespace controller {
         } else if (step.agent_name == adversary.agent_name) {
             adversary.step = step;
             adversary.timer = Timer(.5);
-            if (contains_agent_state(agent.agent_name)) {
+            if (!agent.timer.time_out() && contains_agent_state(agent.agent_name)) {
                 auto predator = get_current_state(agent.agent_name);
                 robot_mtx.lock();
                     auto is_captured = capture.is_captured( predator.location, to_radians(predator.rotation), step.location);
