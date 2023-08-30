@@ -73,6 +73,8 @@ namespace controller {
         Pid_outputs out;
         Pid_inputs in;
         cell_world::Timer timer;
+        // adding
+        double dist_param{};
     };
 
 }
